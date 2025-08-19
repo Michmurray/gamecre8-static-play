@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>GameCre8 — Galaxy Blaster (Auto Assets)</title>
+<title>GameCre8 — Galaxy Blaster</title>
 <style>
   :root{--ui:#fff;--bg:#050813}
   html,body{height:100%;margin:0;background:var(--bg);color:var(--ui);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
@@ -40,12 +40,13 @@
   <div class="overlay" id="start">
     <div class="card">
       <h1>GameCre8 — Galaxy Blaster</h1>
-      <p class="kpi">Controls: ←/→ or A/D, Space to fire. (Tap on mobile)</p>
+      <p class="kpi">Controls: ←/→ or A/D, Space to fire. Tap to shoot on mobile.</p>
       <p class="kpi" id="bestLine"></p>
       <div style="height:10px"></div>
       <button class="btn" id="playBtn">Play Now</button>
     </div>
   </div>
+
   <div class="overlay" id="gameover" style="display:none">
     <div class="card">
       <h1>Game Over</h1>
@@ -70,41 +71,60 @@
     }; tryNext();
   });}
 
-  // Candidate asset locations (works with Kenney packs you uploaded under /assets)
+  // Candidate asset locations (handles /assets/... and root-level Kenney folders you uploaded)
   const CANDIDATES = {
     player: [
       'assets/PNG/playerShip1_blue.png',
+      'assets/PNG/Players/playerShip1_blue.png',
       'assets/PNG/playerShip2_orange.png',
       'assets/PNG/playerShip3_red.png',
-      'assets/PNG/playerShip1_green.png',
-      'assets/PNG/Players/playerShip1_blue.png'
+      'Spritesheet/playerShip1_blue.png',
+      'Spritesheet/Players/playerShip1_blue.png',
+      'Spritesheet/playerShip2_orange.png'
     ],
     enemy: [
       'assets/PNG/Enemies/enemyBlack1.png',
       'assets/PNG/Enemies/enemyBlue1.png',
       'assets/PNG/Enemies/enemyGreen1.png',
-      'assets/PNG/Enemies/enemyRed1.png'
+      'assets/PNG/Enemies/enemyRed1.png',
+      'Spritesheet/Enemies/enemyBlack1.png',
+      'Spritesheet/Enemies/enemyBlue1.png',
+      'Spritesheet/Enemies/enemyGreen1.png',
+      'Spritesheet/Enemies/enemyRed1.png'
     ],
     meteor: [
       'assets/PNG/Meteors/meteorBrown_big1.png',
       'assets/PNG/Meteors/meteorGrey_big1.png',
       'assets/PNG/Meteors/meteorBrown_med1.png',
-      'assets/PNG/Meteors/meteorGrey_med1.png'
+      'assets/PNG/Meteors/meteorGrey_med1.png',
+      'Spritesheet/Meteors/meteorBrown_big1.png',
+      'Spritesheet/Meteors/meteorGrey_big1.png',
+      'Spritesheet/Meteors/meteorBrown_med1.png',
+      'Spritesheet/Meteors/meteorGrey_med1.png'
     ],
     bullet: [
       'assets/PNG/Lasers/laserBlue04.png',
       'assets/PNG/Lasers/laserBlue06.png',
-      'assets/PNG/Lasers/laserBlue10.png'
+      'assets/PNG/Lasers/laserBlue10.png',
+      'Spritesheet/Lasers/laserBlue04.png',
+      'Spritesheet/Lasers/laserBlue06.png',
+      'Spritesheet/Lasers/laserBlue10.png'
     ],
     ebullet: [
       'assets/PNG/Lasers/laserRed02.png',
-      'assets/PNG/Lasers/laserRed06.png'
+      'assets/PNG/Lasers/laserRed06.png',
+      'Spritesheet/Lasers/laserRed02.png',
+      'Spritesheet/Lasers/laserRed06.png'
     ],
     bg: [
       'assets/Backgrounds/black.png',
       'assets/Backgrounds/darkPurple.png',
       'assets/Backgrounds/purple.png',
-      'assets/Backgrounds/blue.png'
+      'assets/Backgrounds/blue.png',
+      'Backgrounds/black.png',
+      'Backgrounds/darkPurple.png',
+      'Backgrounds/purple.png',
+      'Backgrounds/blue.png'
     ]
   };
 
@@ -284,7 +304,7 @@
     }
     if(player.pw>0){ player.pw-=dt; if(player.pw<=0){ player.weapon='single'; } }
 
-    // sparks
+    // sparks (explosions / juice)
     for(let i=sparks.length-1;i>=0;i--){ const s=sparks[i]; s.t+=dt; s.x+=s.vx*dt; s.y+=s.vy*dt; if(s.t>=s.life) sparks.splice(i,1); }
 
     hud();
@@ -322,7 +342,7 @@
     cx.fillStyle='#8ff';
     for(const p of powerups){ cx.beginPath(); cx.arc(p.x,p.y,p.w/2,0,6.283); cx.fill(); }
 
-    // sparks
+    // sparks / explosions with fade
     for(const s of sparks){ const a=1-(s.t/s.life); cx.fillStyle=s.c + a + ')'; cx.beginPath(); cx.arc(s.x,s.y,(s.rad*(.3+.7*a))|0,0,6.283); cx.fill(); }
 
     cx.restore();
