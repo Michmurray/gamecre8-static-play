@@ -3,57 +3,45 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>GameCre8 — Galaxy Blaster (Single-File)</title>
+<title>GameCre8 — Galaxy Blaster (Auto Assets)</title>
 <style>
-  :root{--ui:#fff;--bg:#050813;--accent:#6cf;--good:#53ffb1;--warn:#ffcf5a;--bad:#ff5a7d}
-  html,body{height:100%;margin:0;background:radial-gradient(1200px 800px at 70% 10%, #0b1633 0%, #050813 55%, #03060e 100%);color:var(--ui);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+  :root{--ui:#fff;--bg:#050813}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--ui);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
   #wrap{position:fixed;inset:0;display:grid;place-items:center}
-  canvas{display:block;max-width:100%;max-height:100%;touch-action:none}
-  /* HUD */
-  .hud{position:fixed;inset:auto 0 0 0;pointer-events:none;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
-  .pill{border:1px solid #2a355a;background:rgba(8,14,32,.55);backdrop-filter:blur(4px);padding:8px 12px;border-radius:999px;font-size:13px}
-  .stack{display:flex;gap:8px;align-items:center}
-  .btn{appearance:none;border:1px solid #2a355a;background:linear-gradient(#0a1633,#08122a);color:var(--ui);border-radius:10px;padding:10px 14px;cursor:pointer;font-weight:600;pointer-events:auto}
-  .btn:active{transform:translateY(1px)}
-  /* Overlays */
+  canvas{display:block;max-width:100%;max-height:100%;touch-action:none;image-rendering:pixelated}
+  .hud{position:fixed;left:0;right:0;top:0;display:flex;justify-content:space-between;gap:8px;padding:10px 12px;pointer-events:none}
+  .pill{border:1px solid #2a355a;background:rgba(8,14,32,.55);backdrop-filter:blur(6px);padding:8px 12px;border-radius:999px;font-size:13px}
+  .btn{appearance:none;border:1px solid #2a355a;background:linear-gradient(#0a1633,#08122a);color:#fff;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600;pointer-events:auto}
   .overlay{position:fixed;inset:0;display:grid;place-items:center;background:linear-gradient(180deg,rgba(5,8,19,.88),rgba(5,8,19,.7));text-align:center;padding:24px}
-  h1{font-size:40px;letter-spacing:.5px;margin:0 0 8px 0}
-  h1 .brand{font-weight:800}
-  h1 .eight{color:#3aa8ff;text-shadow:0 0 16px rgba(58,168,255,.7)}
-  .subtitle{opacity:.85;margin:0 0 16px 0}
-  .overlay .card{max-width:560px;border:1px solid #2a355a;background:rgba(8,14,32,.45);backdrop-filter:blur(8px);border-radius:16px;padding:18px;margin:0 auto}
+  .card{max-width:600px;border:1px solid #2a355a;background:rgba(8,14,32,.45);backdrop-filter:blur(10px);border-radius:16px;padding:18px}
+  h1{margin:0 0 8px 0}
   .kpi{font-size:14px;opacity:.9}
-  /* Mobile controls */
   #touch{position:fixed;inset:0;pointer-events:none}
   .pad,.fire{position:absolute;width:95px;height:95px;border-radius:50%;border:1px solid #2a355a;pointer-events:auto}
   .pad{background:rgba(8,14,32,.35);left:16px;bottom:18px}
-  .pad:after{content:'‹ ›';position:absolute;inset:0;display:grid;place-items:center;color:#8fb3ff;opacity:.8}
+  .pad::after{content:'‹ ›';position:absolute;inset:0;display:grid;place-items:center;color:#8fb3ff;opacity:.85}
   .fire{background:rgba(32,8,18,.35);right:16px;bottom:18px}
-  .fire:after{content:'★';position:absolute;inset:0;display:grid;place-items:center;color:#ff9aad;opacity:.9}
+  .fire::after{content:'★';position:absolute;inset:0;display:grid;place-items:center;color:#ff9aad}
   @media (min-width:900px){#touch{display:none}}
 </style>
 </head>
 <body>
   <div id="wrap"><canvas id="c"></canvas></div>
 
-  <!-- HUD -->
   <div class="hud">
-    <div class="stack">
+    <div style="display:flex;gap:8px">
       <div class="pill" id="scorePill">Score: 0</div>
       <div class="pill" id="livesPill">♥♥♥</div>
       <div class="pill" id="powerPill">Power: —</div>
     </div>
-    <div class="stack">
-      <button class="btn" id="pauseBtn">Pause</button>
-    </div>
+    <button class="btn" id="pauseBtn">Pause</button>
   </div>
 
-  <!-- Start / GameOver Overlay -->
   <div class="overlay" id="start">
     <div class="card">
-      <h1><span class="brand">GameCre</span><span class="eight">8</span> — Galaxy Blaster</h1>
-      <p class="subtitle">Polished, responsive single-file demo. Controls: <strong>←/→</strong> or <strong>A/D</strong>, <strong>Space</strong> to fire. (Tap on mobile)</p>
-      <div class="kpi" id="bestLine"></div>
+      <h1>GameCre8 — Galaxy Blaster</h1>
+      <p class="kpi">Controls: ←/→ or A/D, Space to fire. (Tap on mobile)</p>
+      <p class="kpi" id="bestLine"></p>
       <div style="height:10px"></div>
       <button class="btn" id="playBtn">Play Now</button>
     </div>
@@ -61,14 +49,12 @@
   <div class="overlay" id="gameover" style="display:none">
     <div class="card">
       <h1>Game Over</h1>
-      <p class="subtitle">Great run, Pilot.</p>
-      <div class="kpi" id="finalLine"></div>
+      <p class="kpi" id="finalLine"></p>
       <div style="height:10px"></div>
       <button class="btn" id="againBtn">Play Again</button>
     </div>
   </div>
 
-  <!-- Mobile controls -->
   <div id="touch">
     <div class="pad" id="pad"></div>
     <div class="fire" id="fire"></div>
@@ -76,244 +62,291 @@
 
 <script>
 (() => {
-  // ------- Canvas -------
-  const canvas = document.getElementById('c');
-  const ctx = canvas.getContext('2d');
-  const DPR = Math.min(window.devicePixelRatio || 1, 2);
-  const fit = () => {
-    const w = innerWidth, h = innerHeight;
-    canvas.width = Math.round(w * DPR);
-    canvas.height = Math.round(h * DPR);
-    canvas.style.width = w + 'px';
-    canvas.style.height = h + 'px';
+  // ---------- helper: try a list of candidate paths and return first that loads ----------
+  function loadFirst(cands){ return new Promise(res=>{ let i=0, img=new Image();
+    const tryNext=()=>{ if(i>=cands.length){ res(null); return; }
+      img = new Image(); img.decoding='async'; img.crossOrigin='anonymous';
+      img.onload=()=>res({img,src:cands[i]}); img.onerror=()=>{ i++; tryNext(); }; img.src=cands[i];
+    }; tryNext();
+  });}
+
+  // Candidate asset locations (works with Kenney packs you uploaded under /assets)
+  const CANDIDATES = {
+    player: [
+      'assets/PNG/playerShip1_blue.png',
+      'assets/PNG/playerShip2_orange.png',
+      'assets/PNG/playerShip3_red.png',
+      'assets/PNG/playerShip1_green.png',
+      'assets/PNG/Players/playerShip1_blue.png'
+    ],
+    enemy: [
+      'assets/PNG/Enemies/enemyBlack1.png',
+      'assets/PNG/Enemies/enemyBlue1.png',
+      'assets/PNG/Enemies/enemyGreen1.png',
+      'assets/PNG/Enemies/enemyRed1.png'
+    ],
+    meteor: [
+      'assets/PNG/Meteors/meteorBrown_big1.png',
+      'assets/PNG/Meteors/meteorGrey_big1.png',
+      'assets/PNG/Meteors/meteorBrown_med1.png',
+      'assets/PNG/Meteors/meteorGrey_med1.png'
+    ],
+    bullet: [
+      'assets/PNG/Lasers/laserBlue04.png',
+      'assets/PNG/Lasers/laserBlue06.png',
+      'assets/PNG/Lasers/laserBlue10.png'
+    ],
+    ebullet: [
+      'assets/PNG/Lasers/laserRed02.png',
+      'assets/PNG/Lasers/laserRed06.png'
+    ],
+    bg: [
+      'assets/Backgrounds/black.png',
+      'assets/Backgrounds/darkPurple.png',
+      'assets/Backgrounds/purple.png',
+      'assets/Backgrounds/blue.png'
+    ]
   };
+
+  // ---------- Canvas ----------
+  const cv = document.getElementById('c'), cx = cv.getContext('2d');
+  const DPR = Math.min(devicePixelRatio||1, 2);
+  function fit(){ const w=innerWidth,h=innerHeight; cv.width=(w*DPR)|0; cv.height=(h*DPR)|0; cv.style.width=w+'px'; cv.style.height=h+'px'; }
   addEventListener('resize', fit, {passive:true}); fit();
 
-  // ------- UI -------
-  const startOverlay = document.getElementById('start');
-  const gameOverOverlay = document.getElementById('gameover');
+  // ---------- UI ----------
+  const startEl = document.getElementById('start');
+  const overEl  = document.getElementById('gameover');
   const playBtn = document.getElementById('playBtn');
-  const againBtn = document.getElementById('againBtn');
-  const pauseBtn = document.getElementById('pauseBtn');
-  const bestLine = document.getElementById('bestLine');
-  const finalLine = document.getElementById('finalLine');
-  const scorePill = document.getElementById('scorePill');
-  const livesPill = document.getElementById('livesPill');
-  const powerPill = document.getElementById('powerPill');
+  const againBtn= document.getElementById('againBtn');
+  const pauseBtn= document.getElementById('pauseBtn');
+  const bestLine= document.getElementById('bestLine');
+  const finalLine=document.getElementById('finalLine');
+  const scoreP  = document.getElementById('scorePill');
+  const livesP  = document.getElementById('livesPill');
+  const powerP  = document.getElementById('powerPill');
 
-  const touchPad = document.getElementById('pad');
-  const touchFire = document.getElementById('fire');
+  // ---------- Input ----------
+  const keys = {left:false,right:false,shoot:false};
+  addEventListener('keydown',e=>{
+    if(['ArrowLeft','a','A'].includes(e.key)) keys.left=true;
+    if(['ArrowRight','d','D'].includes(e.key)) keys.right=true;
+    if(e.code==='Space') keys.shoot=true;
+    if(e.key.toLowerCase()==='p') togglePause();
+  });
+  addEventListener('keyup',e=>{
+    if(['ArrowLeft','a','A'].includes(e.key)) keys.left=false;
+    if(['ArrowRight','d','D'].includes(e.key)) keys.right=false;
+    if(e.code==='Space') keys.shoot=false;
+  });
 
-  // ------- Input -------
-  const keys = {left:false, right:false, shoot:false};
-  const onKey = (e, down) => {
-    if (['ArrowLeft','a','A'].includes(e.key)) keys.left = down;
-    if (['ArrowRight','d','D'].includes(e.key)) keys.right = down;
-    if (e.code === 'Space') keys.shoot = down;
-    if (down && e.key.toLowerCase() === 'p') togglePause();
-  };
-  addEventListener('keydown', e => onKey(e,true));
-  addEventListener('keyup', e => onKey(e,false));
-
-  // Mobile touch
-  let leftTouch=false, rightTouch=false, fireTouch=false;
-  const enableTouch = (el, down, up) => {
-    el.addEventListener('pointerdown', e => {el.setPointerCapture(e.pointerId); down(e);});
-    el.addEventListener('pointerup', () => up());
-    el.addEventListener('pointercancel', () => up());
-    el.addEventListener('pointerleave', () => up());
-  };
-  enableTouch(touchPad, (e)=>{
-    const rect = touchPad.getBoundingClientRect();
-    const move = (ev)=>{
-      const x = ev.clientX - rect.left;
-      leftTouch = x < rect.width/2; rightTouch = !leftTouch;
-    };
-    move(e); addEventListener('pointermove', move);
-    touchPad.onpointerup = ()=>{leftTouch=rightTouch=false; removeEventListener('pointermove', move);};
-  }, ()=>{leftTouch=rightTouch=false;});
-  enableTouch(touchFire, ()=>{fireTouch=true;}, ()=>{fireTouch=false;});
-
-  // ------- State -------
-  let state = 'start';
-  let tPrev = 0, dt = 0, time = 0;
-  let score = 0, best = Number(localStorage.getItem('gb_best')||0);
-  let screenShake = 0;
-  let rngSeed = 42;
-  const R = () => { rngSeed ^= rngSeed << 13; rngSeed ^= rngSeed >> 17; rngSeed ^= rngSeed << 5; return ((rngSeed<0?~rngSeed+1:rngSeed)%1000)/1000; };
-
-  const stars = [], bullets = [], enemies = [], ebullets = [], powerups = [], explosions = [];
-
-  const world = { w:()=>canvas.width, h:()=>canvas.height, px:(v)=>v*DPR };
-
-  const player = { x:()=>world.w()*0.5, y:()=>world.h()*0.82, w:42*DPR, h:48*DPR, vx:0, speed:540, lives:3, fireCd:0, weapon:'single', powerTimer:0 };
-
-  function resetGame(){
-    score=0; time=0; screenShake=0; rngSeed=(Date.now()%100000)|0;
-    stars.length=bullets.length=enemies.length=ebullets.length=powerups.length=explosions.length=0;
-    player.lives=3; player.weapon='single'; player.powerTimer=0; player.fireCd=0;
-    makeStars(); updateHUD();
+  // Touch pads (mobile)
+  let leftTouch=false,rightTouch=false,fireTouch=false;
+  function touchify(el,down,up){
+    el.addEventListener('pointerdown',ev=>{el.setPointerCapture(ev.pointerId);down(ev);});
+    el.addEventListener('pointerup',up); el.addEventListener('pointercancel',up); el.addEventListener('pointerleave',up);
   }
+  const pad=document.getElementById('pad'), fire=document.getElementById('fire');
+  touchify(pad,(e)=>{
+    const r=pad.getBoundingClientRect();
+    const onMove=ev=>{const x=ev.clientX-r.left; leftTouch=x<r.width/2; rightTouch=!leftTouch;};
+    onMove(e); addEventListener('pointermove',onMove); pad.onpointerup=()=>{leftTouch=rightTouch=false; removeEventListener('pointermove',onMove);};
+  },()=>{leftTouch=rightTouch=false;});
+  touchify(fire,()=>{fireTouch=true;},()=>{fireTouch=false;});
 
-  // ------- Background -------
-  function makeStars(){
-    const layers=[{n:60,s:18,sz:[1,2],c:'rgba(180,200,255,.85)'},{n:50,s:40,sz:[1,3],c:'rgba(130,170,255,.7)'},{n:40,s:80,sz:[1,3],c:'rgba(90,120,220,.55)'}];
-    layers.forEach((L,i)=>{for(let s=0;s<L.n;s++){stars.push({x:R()*world.w(),y:R()*world.h(),vy:L.s*DPR,r:(L.sz[0]+R()*(L.sz[1]-L.sz[0]))*DPR,color:L.c});}});
-  }
-  function drawStars(){
-    for(const s of stars){ s.y+=s.vy*dt; if(s.y>world.h()+10){s.y=-10; s.x=R()*world.w();} ctx.beginPath(); ctx.fillStyle=s.color; ctx.arc(s.x,s.y,s.r,0,6.283); ctx.fill(); }
-    const g=ctx.createRadialGradient(world.w()*0.7, world.h()*0.15, 10, world.w()*0.5, world.h()*0.5, world.h()*0.9);
-    g.addColorStop(0,'rgba(80,120,255,.08)'); g.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,world.w(),world.h());
-  }
-
-  // ------- Helpers -------
-  const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
-  function roundedRect(x,y,w,h,r,fill){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);fill?ctx.fill():ctx.stroke();}
-
-  function addExplosion(x,y,color='rgba(255,200,80,'){for(let i=0;i<24;i++){const a=R()*Math.PI*2,sp=120+R()*220;explosions.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:.5+R()*.35,t:0,color});} screenShake=Math.min(screenShake+8,16);}
-
-  function spawnEnemyWave(){
-    const base=Math.min(1+Math.floor(time/15),6), n=clamp(3+Math.floor(time/10),3,10); const types=(time>45)?['meteor','drone','drone','meteor']:['meteor','drone','meteor'];
-    for(let i=0;i<n;i++){ const type=types[(i+Math.floor(R()*types.length))%types.length];
-      const ex=40*DPR+R()*(world.w()-80*DPR), ey=-40*DPR - i*(40*DPR+R()*40*DPR);
-      if(type==='meteor'){enemies.push({type,x:ex,y:ey,w:36*DPR,h:36*DPR,hp:1+Math.floor(base/2),vx:(R()-.5)*28*DPR,vy:(90+R()*120)*DPR,spin:R()*2-1,a:R()*6.28});}
-      else {enemies.push({type,x:ex,y:ey,w:34*DPR,h:28*DPR,hp:2+Math.floor(base/1.5),vx:(R()-.5)*40*DPR,vy:(120+R()*160)*DPR,fireCd:.8+R()*1.4});}
+  // ---------- Assets (auto-select) ----------
+  const IMG = {};
+  async function loadAssets(){
+    for(const r of ['player','enemy','meteor','bullet','ebullet','bg']){
+      const found = await loadFirst(CANDIDATES[r]);
+      IMG[r] = found ? found.img : null;
     }
   }
-  function maybeMiniBoss(){ if(Math.abs(time-60)<.02){ const bw=120*DPR,bh=90*DPR; enemies.push({type:'boss',x:world.w()/2,y:-bh,w:bw,h:bh,hp:40,vx:0,vy:70*DPR,fireCd:.6}); } }
-  function spawnPowerup(x,y){ if(R()<.4){ const kind=(R()<.5)?'shield':'triple'; powerups.push({x,y,w:28*DPR,h:28*DPR,kind,vy:80*DPR,t:0}); } }
 
-  // ------- Update / Draw -------
-  function update(){
+  // ---------- RNG ----------
+  let seed=(Date.now()%1e6)|0;
+  function R(){ seed^=seed<<13; seed^=seed>>17; seed^=seed<<5; return ((seed>>>0)%1e3)/1e3; }
+
+  // ---------- State ----------
+  const W=()=>cv.width, H=()=>cv.height;
+  const stars=[], bullets=[], enemies=[], ebullets=[], powerups=[], sparks=[];
+  const player={x:W()/2,y:H()*0.82,w:56*DPR,h:56*DPR,spd:560*DPR,lives:3,cd:0,weapon:'single',pw:0,ifr:0};
+  let score=0,best=+(localStorage.getItem('gb_best')||0), time=0, dt=0, tPrev=0, mode='start', shake=0;
+
+  function reset(){
+    stars.length=bullets.length=enemies.length=ebullets.length=powerups.length=sparks.length=0;
+    seed=(Date.now()%1e6)|0; time=0; score=0; shake=0;
+    Object.assign(player,{x:W()/2,y:H()*0.82,w:56*DPR,h:56*DPR,spd:560*DPR,lives:3,cd:0,weapon:'single',pw:0,ifr:0});
+    mkStars(); syncHUD();
+  }
+
+  // ---------- Stars (parallax) ----------
+  function mkStars(){
+    const layers=[
+      {n:80,vy:22,sz:[1,2],c:'rgba(180,200,255,.85)'},
+      {n:70,vy:44,sz:[1,3],c:'rgba(130,170,255,.7)'},
+      {n:60,vy:88,sz:[1,3],c:'rgba(90,120,220,.55)'}
+    ];
+    for(const L of layers) for(let i=0;i<L.n;i++) stars.push({x:R()*W(),y:R()*H(),vy:L.vy*DPR,r:(L.sz[0]+R()*(L.sz[1]-L.sz[0]))*DPR,c:L.c});
+  }
+  function drawBG(){
+    const bg=IMG.bg; if(bg){ const s=Math.max(W()/bg.width,H()/bg.height); const w=bg.width*s,h=bg.height*s; cx.globalAlpha=0.6; cx.drawImage(bg,(W()-w)/2,(H()-h)/2,w,h); cx.globalAlpha=1; }
+    for(const s of stars){ s.y+=s.vy*dt; if(s.y>H()+10){s.y=-10; s.x=R()*W();} cx.beginPath(); cx.fillStyle=s.c; cx.arc(s.x,s.y,s.r,0,6.283); cx.fill(); }
+  }
+
+  // ---------- Helpers / FX ----------
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  function puff(x,y,col='rgba(255,210,120,',rad=26,count=20,spd=220){ for(let i=0;i<count;i++){ const a=R()*6.283, sp=90+R()*spd; sparks.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,t:0,life:.45+R()*.4,c:col,rad}); } shake=Math.min(shake+8,16); }
+  function hud(){ scoreP.textContent='Score: '+score; livesP.textContent='♥'.repeat(player.lives); powerP.textContent= player.weapon==='triple'?'Power: Triple':(player.weapon==='shield'?'Power: Shield':'Power: —'); }
+  function syncHUD(){ hud(); bestLine.textContent='Best: '+best+' • Tip: Grab powerups!'; }
+
+  // ---------- Spawning ----------
+  function spawnWave(){
+    const wave = clamp(1+Math.floor(time/10),1,9);
+    const n = clamp(4+Math.floor(time/5),4,12);
+    for(let i=0;i<n;i++){
+      const kind = (R()<0.45)?'meteor':'drone';
+      const x=40*DPR+R()*(W()-80*DPR), y=-60*DPR - i*(36*DPR+R()*36*DPR);
+      if(kind==='meteor'){
+        enemies.push({t:'meteor',x,y,w:48*DPR,h:48*DPR,hp:1+Math.floor(wave/3),vx:(R()-.5)*28*DPR,vy:(90+R()*120)*DPR,a:R()*6.283,spin:R()*2-1});
+      }else{
+        enemies.push({t:'drone',x,y,w:48*DPR,h:40*DPR,hp:2+Math.floor(wave/2),vx:(R()-.5)*44*DPR,vy:(120+R()*150)*DPR,cd:.9+R()*1.2});
+      }
+    }
+  }
+  function maybeBoss(){ if(Math.abs(time-60)<.02){ enemies.push({t:'boss',x:W()/2,y:-140*DPR,w:140*DPR,h:100*DPR,hp:75, vx:0,vy:70*DPR, cd:.4}); } }
+  function spawnPU(x,y){ if(R()<.45){ powerups.push({x,y,w:28*DPR,h:28*DPR,kind:(R()<.5?'shield':'triple'),vy:80*DPR}); } }
+
+  // ---------- Update ----------
+  function step(){
+    dt = Math.min(0.033, dt); // clamp for stability
     time+=dt;
-    // input
-    const left = keys.left||leftTouch, right = keys.right||rightTouch;
-    player.vx = (right?1:0) - (left?1:0);
-    const nx = clamp((player._x??player.x()) + player.vx * (player.speed*DPR) * dt, 28*DPR, world.w()-28*DPR);
-    const py = player._y??player.y();
-    const shooting = keys.shoot||fireTouch;
-    player.fireCd -= dt;
-    if(shooting && player.fireCd<=0){
-      const base={x:nx,y:py-26*DPR,w:6*DPR,h:16*DPR,vy:-520*DPR};
-      if(player.weapon==='single'){ bullets.push({...base}); player.fireCd=.14; }
-      else { bullets.push({...base}); bullets.push({...base,x:nx-12*DPR}); bullets.push({...base,x:nx+12*DPR}); player.fireCd=.22; }
-      addExplosion(nx,py-30*DPR,'rgba(140,200,255,'); screenShake=Math.min(screenShake+2,10);
-    }
-    player._x = nx; player._y = py;
+    const left=keys.left||leftTouch, right=keys.right||rightTouch, shoot=keys.shoot||fireTouch;
 
-    // spawns
-    if(Math.floor((time-dt)/2)!==Math.floor(time/2)) spawnEnemyWave();
-    maybeMiniBoss();
+    const vx=(right?1:0)-(left?1:0);
+    player.x=clamp(player.x + vx*player.spd*dt, 28*DPR, W()-28*DPR);
+    if(player.ifr>0) player.ifr-=dt;
 
-    // enemies
-    for(let i=enemies.length-1;i>=0;i--){ const e=enemies[i]; e.y+=e.vy*dt; e.x+=e.vx*dt; if(e.spin) e.a+=e.spin*dt;
-      if(e.type!=='meteor'){ e.fireCd-=dt; if(e.fireCd<=0){ ebullets.push({x:e.x,y:e.y+e.h*.5,w:6*DPR,h:14*DPR,vy:260*DPR}); e.fireCd=(e.type==='boss')?.25:1.2+R()*1.0; } }
-      if(e.y-e.h>world.h()+40) enemies.splice(i,1);
+    player.cd-=dt;
+    if(shoot && player.cd<=0){
+      const base={x:player.x,y:player.y-28*DPR,w:10*DPR,h:24*DPR,vy:-560*DPR};
+      bullets.push({...base});
+      if(player.weapon!=='single'){ bullets.push({...base,x:player.x-14*DPR}); bullets.push({...base,x:player.x+14*DPR}); }
+      player.cd=(player.weapon==='single')?.14:.2;
+      puff(player.x,player.y-26*DPR,'rgba(140,200,255,',18,160);
     }
 
-    // bullets
-    for(let i=bullets.length-1;i>=0;i--){ const b=bullets[i]; b.y+=b.vy*dt; if(b.y+b.h<-20) bullets.splice(i,1); }
-    for(let i=ebullets.length-1;i>=0;i--){ const eb=ebullets[i]; eb.y+=eb.vy*dt; if(eb.y-eb.h>world.h()+20) ebullets.splice(i,1); }
+    // waves & boss
+    if(Math.floor((time-dt)/2)!==Math.floor(time/2)) spawnWave();
+    maybeBoss();
 
-    for(let i=powerups.length-1;i>=0;i--){ const p=powerups[i]; p.t+=dt; p.y+=p.vy*dt; if(p.y-p.h>world.h()+20) powerups.splice(i,1); }
+    for(let i=enemies.length-1;i>=0;i--){ const e=enemies[i];
+      e.y+=e.vy*dt; e.x+=e.vx*dt; if(e.spin) e.a+=e.spin*dt;
+      if(e.t!=='meteor'){ e.cd-=dt; if(e.cd<=0){ ebullets.push({x:e.x,y:e.y+e.h*.5,w:8*DPR,h:18*DPR,vy:260*DPR}); e.cd=(e.t==='boss')?.25:1.1+R(); } }
+      if(e.y-e.h>H()+40) enemies.splice(i,1);
+    }
+    for(let i=bullets.length-1;i>=0;i--){ const b=bullets[i]; b.y+=b.vy*dt; if(b.y+b.h<-30) bullets.splice(i,1); }
+    for(let i=ebullets.length-1;i>=0;i--){ const b=ebullets[i]; b.y+=b.vy*dt; if(b.y-b.h>H()+30) ebullets.splice(i,1); }
+    for(let i=powerups.length-1;i>=0;i--){ const p=powerups[i]; p.y+=p.vy*dt; if(p.y-p.h>H()+30) powerups.splice(i,1); }
 
-    // collisions: bullets → enemies
+    // bullets -> enemies
     for(let i=enemies.length-1;i>=0;i--){ const e=enemies[i];
       for(let j=bullets.length-1;j>=0;j--){ const b=bullets[j];
-        if(Math.abs(e.x-b.x)*2<(e.w+b.w) && Math.abs(e.y-b.y)*2<(e.h+b.h)){
-          bullets.splice(j,1); e.hp-=1; addExplosion(b.x,b.y,'rgba(130,180,255,'); if(e.hp<=0){ score+=(e.type==='boss')?500:50; addExplosion(e.x,e.y,'rgba(255,200,120,'); spawnPowerup(e.x,e.y); enemies.splice(i,1);} break;
+        if(Math.abs(e.x-b.x)*2<(e.w+b.w)&&Math.abs(e.y-b.y)*2<(e.h+b.h)){
+          bullets.splice(j,1); e.hp--; puff(b.x,b.y,'rgba(130,180,255,',14,120,180);
+          if(e.hp<=0){ score += (e.t==='boss')?800:80; puff(e.x,e.y,'rgba(255,200,120,',36,240,260); spawnPU(e.x,e.y); enemies.splice(i,1); }
+          break;
         }
       }
     }
 
-    // collisions: player with ebullets/enemies
-    const pBox={x:player._x,y:player._y,w:player.w,h:player.h};
+    // hits on player
+    const P={x:player.x,y:player.y,w:player.w,h:player.h};
     let hit=false;
-    for(let i=ebullets.length-1;i>=0;i--){ const eb=ebullets[i];
-      if(Math.abs(pBox.x-eb.x)*2<(pBox.w+eb.w) && Math.abs(pBox.y-eb.y)*2<(pBox.h+eb.h)){ ebullets.splice(i,1); hit=true; }
+    for(let i=ebullets.length-1;i>=0;i--){ const b=ebullets[i];
+      if(Math.abs(P.x-b.x)*2<(P.w+b.w)&&Math.abs(P.y-b.y)*2<(P.h+b.h)){ ebullets.splice(i,1); hit=true; }
     }
     for(let i=enemies.length-1;i>=0;i--){ const e=enemies[i];
-      if(Math.abs(pBox.x-e.x)*2<(pBox.w+e.w) && Math.abs(pBox.y-e.y)*2<(pBox.h+e.h)){ enemies.splice(i,1); hit=true; }
+      if(Math.abs(P.x-e.x)*2<(P.w+e.w)&&Math.abs(P.y-e.y)*2<(P.h+e.h)){ enemies.splice(i,1); hit=true; }
     }
-    if(hit){
-      if(player.powerTimer>0 && player.weapon==='shielded'){ player.powerTimer=0; player.weapon='single'; addExplosion(pBox.x,pBox.y,'rgba(120,220,200,'); }
-      else { player.lives--; addExplosion(pBox.x,pBox.y,'rgba(255,120,140,'); screenShake=12; if(player.lives<=0) return endGame(); }
+    if(hit && player.ifr<=0){
+      if(player.weapon==='shield'){ player.weapon='single'; player.pw=0; puff(P.x,P.y,'rgba(120,220,200,',30,200); }
+      else { player.lives--; player.ifr=1.2; puff(P.x,P.y,'rgba(255,120,140,',32,200); shake=14; if(player.lives<=0){ return end(); } }
     }
 
-    // power timers + pickups
+    // pickups
     for(let i=powerups.length-1;i>=0;i--){ const p=powerups[i];
-      if(Math.abs(pBox.x-p.x)*2<(pBox.w+p.w) && Math.abs(pBox.y-p.y)*2<(pBox.h+p.h)){
-        if(p.kind==='shield'){ player.weapon='shielded'; player.powerTimer=12; } else { player.weapon='triple'; player.powerTimer=10; }
-        powerups.splice(i,1); addExplosion(pBox.x,pBox.y-30*DPR,'rgba(140,220,255,');
+      if(Math.abs(P.x-p.x)*2<(P.w+p.w)&&Math.abs(P.y-p.y)*2<(P.h+p.h)){
+        if(p.kind==='shield'){ player.weapon='shield'; player.pw=10; }
+        else { player.weapon='triple'; player.pw=10; }
+        powerups.splice(i,1); puff(P.x,P.y-30*DPR,'rgba(140,220,255,',22,160);
       }
     }
-    if(player.powerTimer>0){ player.powerTimer-=dt; if(player.powerTimer<=0) player.weapon='single'; }
+    if(player.pw>0){ player.pw-=dt; if(player.pw<=0){ player.weapon='single'; } }
 
-    // explosions
-    for(let i=explosions.length-1;i>=0;i--){ const ex=explosions[i]; ex.t+=dt; ex.x+=ex.vx*dt; ex.y+=ex.vy*dt; if(ex.t>=ex.life) explosions.splice(i,1); }
+    // sparks
+    for(let i=sparks.length-1;i>=0;i--){ const s=sparks[i]; s.t+=dt; s.x+=s.vx*dt; s.y+=s.vy*dt; if(s.t>=s.life) sparks.splice(i,1); }
 
-    updateHUD();
+    hud();
   }
 
+  // ---------- Draw ----------
   function draw(){
-    const sh=screenShake; if(screenShake>0) screenShake=Math.max(0,screenShake-.8);
-    ctx.save(); if(sh>0){ ctx.translate((R()*2-1)*sh,(R()*2-1)*sh); }
-    ctx.clearRect(0,0,world.w(),world.h()); drawStars();
+    const s=shake; if(shake>0) shake=Math.max(0,shake-.85);
+    cx.save(); if(s>0) cx.translate((R()-.5)*s*DPR,(R()-.5)*s*DPR);
+    cx.clearRect(0,0,W(),H());
+    drawBG();
 
-    // player
-    drawPlayer(player._x??player.x(), player._y??player.y());
-    for(const b of bullets) drawBullet(b);
-    for(const e of enemies) drawEnemy(e);
-    for(const eb of ebullets) drawEnemyBullet(eb);
-    for(const p of powerups) drawPowerup(p);
-    for(const ex of explosions) drawExplosion(ex);
-    ctx.restore();
+    // player (blink on i-frames)
+    if(!(player.ifr>0 && Math.floor(time*20)%2===0)){
+      if(IMG.player){ const im=IMG.player; cx.drawImage(im,(player.x-player.w/2)|0,(player.y-player.h/2)|0,player.w,player.h); }
+      else { cx.fillStyle='#8bf'; cx.fillRect((player.x-player.w/2)|0,(player.y-player.h/2)|0,player.w,player.h); }
+    }
+
+    // bullets
+    if(IMG.bullet){ for(const b of bullets) cx.drawImage(IMG.bullet,(b.x-b.w/2)|0,(b.y-b.h/2)|0,b.w,b.h); }
+    else { cx.fillStyle='#9df'; for(const b of bullets) cx.fillRect((b.x-b.w/2)|0,(b.y-b.h/2)|0,b.w,b.h); }
+
+    // enemy bullets
+    if(IMG.ebullet){ for(const b of ebullets) cx.drawImage(IMG.ebullet,(b.x-b.w/2)|0,(b.y-b.h/2)|0,b.w,b.h); }
+    else { cx.fillStyle='#f88'; for(const b of ebullets) cx.fillRect((b.x-b.w/2)|0,(b.y-b.h/2)|0,b.w,b.h); }
+
+    // enemies
+    for(const e of enemies){
+      if(e.t==='meteor' && IMG.meteor){ cx.save(); cx.translate(e.x,e.y); cx.rotate(e.a||0); cx.drawImage(IMG.meteor,-e.w/2,-e.h/2,e.w,e.h); cx.restore(); }
+      else if(IMG.enemy){ cx.drawImage(IMG.enemy,(e.x-e.w/2)|0,(e.y-e.h/2)|0,e.w,e.h); }
+      else { cx.fillStyle='#f54'; cx.fillRect((e.x-e.w/2)|0,(e.y-e.h/2)|0,e.w,e.h); }
+    }
+
+    // powerups
+    cx.fillStyle='#8ff';
+    for(const p of powerups){ cx.beginPath(); cx.arc(p.x,p.y,p.w/2,0,6.283); cx.fill(); }
+
+    // sparks
+    for(const s of sparks){ const a=1-(s.t/s.life); cx.fillStyle=s.c + a + ')'; cx.beginPath(); cx.arc(s.x,s.y,(s.rad*(.3+.7*a))|0,0,6.283); cx.fill(); }
+
+    cx.restore();
   }
 
-  // ------- Render helpers -------
-  function drawPlayer(x,y){
-    ctx.save();
-    const g=ctx.createRadialGradient(x,y,6*DPR,x,y,36*DPR); g.addColorStop(0,'rgba(120,200,255,.75)'); g.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,36*DPR,0,6.283); ctx.fill();
-    ctx.fillStyle='#9bd1ff'; roundedRect(x-18*DPR,y-22*DPR,36*DPR,44*DPR,8*DPR,true);
-    ctx.fillStyle='#193a6e'; roundedRect(x-10*DPR,y-10*DPR,20*DPR,20*DPR,6*DPR,true);
-    ctx.fillStyle='#7fbaff'; roundedRect(x-30*DPR,y-8*DPR,20*DPR,10*DPR,4*DPR,true); roundedRect(x+10*DPR,y-8*DPR,20*DPR,10*DPR,4*DPR,true);
-    if(player.weapon==='shielded'){ ctx.strokeStyle='rgba(120,220,200,.9)'; ctx.lineWidth=3*DPR; ctx.beginPath(); ctx.arc(x,y,34*DPR,0,6.283); ctx.stroke(); }
-    ctx.restore();
-  }
-  function drawBullet(b){ ctx.fillStyle='#aee1ff'; roundedRect(b.x-b.w/2,b.y-b.h/2,b.w,b.h,3*DPR,true); }
-  function drawEnemy(e){
-    if(e.type==='meteor'){ ctx.save(); ctx.translate(e.x,e.y); ctx.rotate(e.a||0); ctx.fillStyle='#a98e6a'; roundedRect(-e.w/2,-e.h/2,e.w,e.h,6*DPR,true); ctx.strokeStyle='#6b543a'; ctx.lineWidth=2*DPR; ctx.strokeRect(-e.w/2+3*DPR,-e.h/2+3*DPR,e.w-6*DPR,e.h-6*DPR); ctx.restore(); }
-    else if(e.type==='drone'){ ctx.save(); ctx.translate(e.x,e.y); ctx.fillStyle='#ff8aa0'; roundedRect(-e.w/2,-e.h/2,e.w,e.h,6*DPR,true); ctx.fillStyle='#2a0b1a'; roundedRect(-8*DPR,-6*DPR,16*DPR,12*DPR,4*DPR,true); ctx.restore(); }
-    else { ctx.save(); ctx.translate(e.x,e.y); ctx.fillStyle='#ffcf5a'; roundedRect(-e.w/2,-e.h/2,e.w,e.h,12*DPR,true); ctx.strokeStyle='#7d5a1a'; ctx.lineWidth=3*DPR; ctx.strokeRect(-e.w/2+4*DPR,-e.h/2+4*DPR,e.w-8*DPR,e.h-8*DPR); ctx.restore(); }
-  }
-  function drawEnemyBullet(eb){ ctx.fillStyle='#ff9aad'; roundedRect(eb.x-eb.w/2,eb.y-eb.h/2,eb.w,eb.h,3*DPR,true); }
-  function drawPowerup(p){ ctx.save(); ctx.translate(p.x,p.y); if(p.kind==='shield'){ ctx.strokeStyle='rgba(120,220,200,.95)'; ctx.lineWidth=3*DPR; ctx.beginPath(); ctx.arc(0,0,12*DPR,0,6.283); ctx.stroke(); } else { ctx.fillStyle='#c5f5ff'; roundedRect(-10*DPR,-10*DPR,20*DPR,20*DPR,5*DPR,true);} ctx.restore(); }
-  function drawExplosion(ex){ const life=ex.t/ex.life, a=Math.max(0,1-life); ctx.fillStyle=ex.color+(0.65*a)+')'; ctx.beginPath(); ctx.arc(ex.x,ex.y,(8+life*28)*DPR,0,6.283); ctx.fill(); }
-
-  // ------- HUD/State -------
-  function updateHUD(){ scorePill.textContent='Score: '+score; livesPill.textContent='♥'.repeat(player.lives); powerPill.textContent= player.weapon==='triple'?'Power: Triple':(player.weapon==='shielded'?'Power: Shield':'Power: —'); }
-  function endGame(){ state='over'; best=Math.max(best,score); localStorage.setItem('gb_best',String(best)); finalLine.textContent=`Score: ${score}  •  Best: ${best}`; gameOverOverlay.style.display='grid'; }
-  function togglePause(){ if(state==='play'){state='pause'; pauseBtn.textContent='Resume';} else if(state==='pause'){state='play'; pauseBtn.textContent='Pause';} }
-
-  // ------- Loop -------
-  function loop(ts){
-    if(!tPrev) tPrev=ts; dt=Math.min(.033,(ts-tPrev)/1000); tPrev=ts;
-    if(state==='play'){ update(); draw(); }
-    else if(state==='pause'){ draw(); ctx.fillStyle='rgba(5,8,19,.45)'; ctx.fillRect(0,0,world.w(),world.h()); ctx.fillStyle='rgba(200,220,255,.95)'; ctx.font=(20*DPR)+'px system-ui'; ctx.textAlign='center'; ctx.fillText('Paused — press P or Resume', world.w()/2, world.h()/2); }
+  // ---------- Loop ----------
+  function loop(t){
+    dt=Math.min(0.033,(t-tPrev)/1000||0.016); tPrev=t;
+    if(mode==='play'){ step(); draw(); }
     requestAnimationFrame(loop);
   }
-  requestAnimationFrame(loop);
 
-  // ------- UI events -------
-  playBtn.addEventListener('click', ()=>{ startOverlay.style.display='none'; gameOverOverlay.style.display='none'; resetGame(); state='play'; pauseBtn.textContent='Pause'; });
-  againBtn.addEventListener('click', ()=>{ gameOverOverlay.style.display='none'; resetGame(); state='play'; pauseBtn.textContent='Pause'; });
-  pauseBtn.addEventListener('click', togglePause);
+  // ---------- Flow ----------
+  function start(){ startEl.style.display='none'; overEl.style.display='none'; reset(); mode='play'; }
+  function end(){ mode='over'; overEl.style.display='grid'; finalLine.textContent='Score: '+score; best=Math.max(best,score); localStorage.setItem('gb_best',best); }
+  let paused=false;
+  function togglePause(){ paused=!paused; if(paused){ mode='pause'; pauseBtn.textContent='Resume'; } else { mode='play'; pauseBtn.textContent='Pause'; } }
 
-  bestLine.textContent='Best score: '+best+'  •  Tip: Grab powerups!';
+  // hook up UI
+  playBtn.onclick=start; againBtn.onclick=()=>{ overEl.style.display='none'; start(); }; pauseBtn.onclick=togglePause;
 
-  // init player position
-  player._x=player.x(); player._y=player.y();
+  // init
+  (async function init(){ await loadAssets(); bestLine.textContent='Best: '+best; requestAnimationFrame(loop); })();
+
 })();
 </script>
 </body>
