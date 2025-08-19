@@ -330,6 +330,37 @@ addEventListener("keydown",(e)=>{ if(e.key.toLowerCase()==="p" && running){ paus
     document.getElementById("retryBtn").addEventListener("click",()=>location.reload());
   }
 })();
+</script><!-- ===== TEMP TESTER: remove after verifying APIs ===== -->
+<div id="tester" style="position:fixed;right:12px;top:12px;background:#101522;color:#fff;padding:10px;border-radius:10px;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.5)">
+  <div style="font-weight:700;margin-bottom:6px">API Tester</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+    <button id="tGen" style="padding:6px 10px;border:0;border-radius:8px;background:#4b6bff;color:#fff;cursor:pointer">Test /api/generate</button>
+    <button id="tMutTrip" style="padding:6px 10px;border:0;border-radius:8px;background:#2bb673;color:#061;cursor:pointer">Mutate: triple_shot</button>
+    <button id="tMutFast" style="padding:6px 10px;border:0;border-radius:8px;background:#ffab2e;color:#271;cursor:pointer">Mutate: faster_enemies</button>
+  </div>
+  <pre id="tOut" style="margin:0;max-width:420px;max-height:260px;overflow:auto;font-size:12px;background:#0b0f18;padding:8px;border-radius:8px"></pre>
+</div>
+<script>
+  async function call(url, body){
+    const r = await fetch(url, { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(body) });
+    const j = await r.json();
+    document.getElementById("tOut").textContent = JSON.stringify(j, null, 2);
+    return j;
+  }
+  document.getElementById("tGen").onclick = async () => {
+    // Change the prompt text if you want
+    window.lastCfg = await call("/api/generate", { prompt: "blue galaxy blaster" });
+  };
+  document.getElementById("tMutTrip").onclick = async () => {
+    if(!window.lastCfg){ alert("Run Test /api/generate first."); return; }
+    window.lastCfg = await call("/api/mutate", { config: window.lastCfg, upgrade: "triple_shot" });
+  };
+  document.getElementById("tMutFast").onclick = async () => {
+    if(!window.lastCfg){ alert("Run Test /api/generate first."); return; }
+    window.lastCfg = await call("/api/mutate", { config: window.lastCfg, upgrade: "faster_enemies" });
+  };
 </script>
+<!-- ===== /TEMP TESTER ===== -->
+
 </body>
 </html>
