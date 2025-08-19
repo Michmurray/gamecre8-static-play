@@ -1,307 +1,335 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Galaxy Blaster</title>
-  <style>
-    :root { --bg:#000; --fg:#e8e8f0; --accent:#56ccf2; --muted:#9aa0a6; }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; margin: 0; background: var(--bg); color: var(--fg); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; }
-    #wrap { display: grid; place-items: center; height: 100%; padding: 12px; }
-    canvas { width: 100%; max-width: 960px; height: auto; aspect-ratio: 16/9; border: 1px solid #111; background: #000; display: block; }
-    .hud { position: fixed; inset: 12px auto auto 12px; font-weight: 600; text-shadow: 0 1px 2px #000; }
-    .hud span { margin-right: 16px; }
-    .help { position: fixed; right: 12px; bottom: 12px; font-size: 12px; color: var(--muted); background: rgba(0,0,0,.35); padding: 6px 8px; border-radius: 6px; }
-    .centerOverlay {
-      position: fixed; inset: 0; display: none; place-items: center;
-      background: rgba(0,0,0,0.6); text-align: center; padding: 20px;
-    }
-    .centerOverlay.active { display: grid; }
-    .panel {
-      background: #0b0b12; border: 1px solid #1b1b26; border-radius: 12px;
-      padding: 20px; max-width: 560px; width: 92%;
-      box-shadow: 0 8px 30px rgba(0,0,0,.5);
-    }
-    .panel h1 { margin: 0 0 10px; font-size: 28px; }
-    .btn {
-      display: inline-block; padding: 10px 16px; border-radius: 10px; cursor: pointer;
-      background: var(--accent); color: #061018; font-weight: 800; border: 0; margin-top: 10px;
-    }
-    a { color: var(--accent); }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Galaxy Blaster — FX Edition</title>
+<style>
+  :root { --bg:#000; --fg:#e8e8f0; --accent:#56ccf2; --muted:#9aa0a6; }
+  * { box-sizing: border-box; }
+  html,body { height:100%; margin:0; background:#000; color:var(--fg); font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial; }
+  #wrap { display:grid; place-items:center; height:100%; padding:12px; }
+  canvas { width:100%; max-width:960px; height:auto; aspect-ratio:16/9; border:1px solid #111; background:#000; display:block; }
+  .hud { position:fixed; inset:12px auto auto 12px; font-weight:600; text-shadow:0 1px 2px #000; }
+  .hud span { margin-right:16px; }
+  .help { position:fixed; right:12px; bottom:12px; font-size:12px; color:var(--muted); background:rgba(0,0,0,.35); padding:6px 8px; border-radius:6px; }
+  .centerOverlay{ position:fixed; inset:0; display:none; place-items:center; background:rgba(0,0,0,.6); text-align:center; padding:20px;}
+  .centerOverlay.active{ display:grid; }
+  .panel{ background:#0b0b12; border:1px solid #1b1b26; border-radius:12px; padding:20px; max-width:560px; width:92%; box-shadow:0 8px 30px rgba(0,0,0,.5);}
+  .panel h1{ margin:0 0 10px; font-size:28px; }
+  .btn{ display:inline-block; padding:10px 16px; border-radius:10px; cursor:pointer; background:var(--accent); color:#061018; font-weight:800; border:0; margin-top:10px; }
+</style>
 </head>
 <body>
   <div class="hud">
     <span id="score">Score: 0</span>
     <span id="lives">Lives: 3</span>
+    <span id="mult">x1.0</span>
   </div>
-  <div id="wrap">
-    <canvas id="game" width="960" height="540"></canvas>
-  </div>
+  <div id="wrap"><canvas id="game" width="960" height="540"></canvas></div>
   <div class="help">Move: WASD / Arrows • Shoot: Space • Pause: P</div>
+  <div id="overlay" class="centerOverlay active"><div class="panel">
+    <h1>Galaxy Blaster</h1>
+    <p>Now with explosions, smoke, and meteor splitting. Survive and rack up points!</p>
+    <p><strong>Controls:</strong> WASD / Arrows to move • Space to shoot • P to pause.</p>
+    <button id="startBtn" class="btn">Start</button>
+  </div></div>
 
-  <div id="overlay" class="centerOverlay active">
-    <div class="panel">
-      <h1>Galaxy Blaster</h1>
-      <p>Blast enemies and dodge meteors. Collect points and survive!</p>
-      <p><strong>Controls:</strong> WASD / Arrows to move, Space to shoot, P to pause.</p>
-      <button id="startBtn" class="btn">Start</button>
-    </div>
-  </div>
+<script>
+/* --------- Only edit these if you want different files --------- */
+const ASSET_PATHS = {
+  background: "/Backgrounds/black.png",
+  player: "/playerShip1_blue.png",
+  enemy: "/Enemies/enemyRed3.png",
+  meteor: "/Meteors/meteorBrown_big1.png",
+  bullet: "/Lasers/laserBlue06.png"
+};
+/* --------------------------------------------------------------- */
 
-  <script>
-    // ---- Update these if your filenames differ ----
-    const ASSET_PATHS = {
-      background: "/Backgrounds/black.png",
-      player: "/playerShip1_blue.png",
-      enemy: "/Enemies/enemyRed3.png",
-      meteor: "/Meteors/meteorBrown_big1.png",
-      bullet: "/Lasers/laserBlue06.png"
-    };
-    // ----------------------------------------------
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const W = canvas.width, H = canvas.height;
 
-    const canvas = document.getElementById("game");
-    const ctx = canvas.getContext("2d");
-    const W = canvas.width, H = canvas.height;
+const scoreEl = document.getElementById("score");
+const livesEl = document.getElementById("lives");
+const multEl  = document.getElementById("mult");
+const overlay = document.getElementById("overlay");
+const startBtn = document.getElementById("startBtn");
 
-    // HUD
-    const scoreEl = document.getElementById("score");
-    const livesEl = document.getElementById("lives");
-    const overlay = document.getElementById("overlay");
-    const startBtn = document.getElementById("startBtn");
+const keys = {};
+addEventListener("keydown", (e)=>{ keys[e.key.toLowerCase()] = true; if([" ","arrowup","arrowdown","arrowleft","arrowright"].includes(e.key.toLowerCase())) e.preventDefault(); });
+addEventListener("keyup",   (e)=>{ keys[e.key.toLowerCase()] = false; });
 
-    // Input
-    const keys = {};
-    addEventListener("keydown", (e)=>{ keys[e.key.toLowerCase()] = true; if ([" ", "arrowup", "arrowdown", "arrowleft", "arrowright"].includes(e.key.toLowerCase())) e.preventDefault(); });
-    addEventListener("keyup",   (e)=>{ keys[e.key.toLowerCase()] = false; });
+function loadImage(src){ return new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=src; }); }
+const assets={};
 
-    // Images
-    function loadImage(src) { return new Promise((res, rej)=>{ const i = new Image(); i.onload = ()=>res(i); i.onerror = rej; i.src = src; }); }
-    const assets = {};
+class Entity {
+  constructor(x,y,w,h,img){ this.x=x; this.y=y; this.w=w; this.h=h; this.img=img; this.dx=0; this.dy=0; this.dead=false; }
+  rect(){ return {x:this.x, y:this.y, w:this.w, h:this.h}; }
+  draw(){ ctx.drawImage(this.img, this.x, this.y, this.w, this.h); }
+}
 
-    // Entities
-    class Entity {
-      constructor(x,y,w,h,img) { this.x=x; this.y=y; this.w=w; this.h=h; this.img=img; this.dx=0; this.dy=0; this.dead=false; }
-      rect(){ return {x:this.x, y:this.y, w:this.w, h:this.h}; }
-      draw(){ ctx.drawImage(this.img, this.x, this.y, this.w, this.h); }
+class Bullet extends Entity {
+  constructor(x,y){ super(x,y,16,32,assets.bullet); this.dy=-9; }
+  update(){ this.y+=this.dy; if(this.y+this.h<0) this.dead=true; }
+}
+
+class Enemy extends Entity {
+  constructor(x,y){ super(x,y,56,56,assets.enemy); this.dy=2+Math.random()*1.2; this.dx=(Math.random()*2-1)*1.1; this.hp=1; }
+  update(){ this.x+=this.dx; this.y+=this.dy; if(this.y>H+60) this.dead=true; if(this.x<0||this.x+this.w>W) this.dx*=-1; }
+}
+
+class Meteor extends Entity {
+  constructor(x,y,size=64,speedScale=1){ super(x,y,size,size,assets.meteor); this.dy=(2.3+Math.random()*1.6)*speedScale; this.dx=(Math.random()*2-1)*1.6*speedScale; this.angle=0; this.spin=(Math.random()*0.05)+0.01; this.hp = size>=64?2:1; this.size=size; }
+  update(){ this.x+=this.dx; this.y+=this.dy; this.angle+=this.spin; if(this.y>H+this.size) this.dead=true; }
+  draw(){
+    ctx.save(); ctx.translate(this.x+this.w/2, this.y+this.h/2); ctx.rotate(this.angle);
+    ctx.drawImage(this.img, -this.w/2, -this.h/2, this.w, this.h); ctx.restore();
+  }
+}
+
+const player = { x:W/2-28, y:H-110, w:56, h:56, speed:4.2, img:null, cooldown:0, lives:3, inv:0 };
+let bullets=[], enemies=[], meteors=[], particles=[], popups=[];
+let bgScroll=0, score=0, mult=1, multTimer=0;
+let paused=false, running=false, difficulty=1, time=0;
+let shake=0;
+
+function aabb(a,b){ return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
+
+function rand(min,max){ return Math.random()*(max-min)+min; }
+function spawnEnemies(){
+  const rate = 0.02 + difficulty*0.004;
+  if(Math.random()<rate){ enemies.push(new Enemy(rand(0,W-56), -70)); }
+}
+function spawnMeteors(){
+  const rate = 0.015 + difficulty*0.003;
+  if(Math.random()<rate){ meteors.push(new Meteor(rand(0,W-70), -90, 64)); }
+  // occasional meteor cluster
+  if(Math.random()<0.0015){ for(let i=0;i<4;i++) meteors.push(new Meteor(rand(0,W-70), -90 - i*40, 64)); }
+}
+
+// Particles (sparks + smoke)
+class Particle {
+  constructor(x,y,vx,vy,life, size, color, smoke=false){
+    this.x=x; this.y=y; this.vx=vx; this.vy=vy; this.life=life; this.max=life;
+    this.size=size; this.color=color; this.smoke=smoke;
+  }
+  update(){
+    this.x+=this.vx; this.y+=this.vy;
+    if(this.smoke){ this.vx*=0.98; this.vy*=0.98; } else { this.vy+=0.12; }
+    this.life--;
+  }
+  draw(){
+    const t = this.life/this.max;
+    ctx.globalAlpha = Math.max(t,0)*0.9;
+    if(this.smoke){
+      ctx.fillStyle = "rgba(180,180,190,1)";
+      ctx.beginPath(); ctx.arc(this.x, this.y, this.size*(1.2 - 0.8*t), 0, Math.PI*2); ctx.fill();
+    } else {
+      ctx.fillStyle = this.color;
+      ctx.beginPath(); ctx.arc(this.x, this.y, this.size*(0.6 + 0.6*t), 0, Math.PI*2); ctx.fill();
     }
-    class Bullet extends Entity {
-      constructor(x,y){ super(x,y,16,32,assets.bullet); this.dy = -8; }
-      update(){ this.y += this.dy; if(this.y + this.h < 0) this.dead = true; }
+    ctx.globalAlpha = 1;
+  }
+}
+
+function explode(x,y, big=false){
+  // sparks
+  for(let i=0;i<(big?40:20);i++){
+    const ang = Math.random()*Math.PI*2;
+    const spd = big? rand(2.5,5):rand(2,4);
+    particles.push(new Particle(x,y, Math.cos(ang)*spd, Math.sin(ang)*spd, rand(20,40), rand(2,4), i%2? "#ffd166":"#fca311"));
+  }
+  // smoke
+  for(let i=0;i<(big?24:12);i++){
+    particles.push(new Particle(x+rand(-8,8), y+rand(-8,8), rand(-0.4,0.4), rand(-0.6,0.2), rand(30,60), rand(6,12), "", true));
+  }
+  shake = Math.max(shake, big?12:7);
+}
+
+function addPopup(x,y,txt,color="#aef"){
+  popups.push({x,y,txt,vy:-0.6,life:50,color});
+}
+
+// Meteor splitting
+function splitMeteor(m){
+  if(m.size>40){
+    const count = 2 + (Math.random()<0.5?1:0);
+    for(let i=0;i<count;i++){
+      const child = new Meteor(m.x+rand(-10,10), m.y+rand(-10,10), 36, 1.2);
+      child.dx += rand(-0.8,0.8);
+      child.dy += rand(-0.4,0.6);
+      meteors.push(child);
     }
-    class Enemy extends Entity {
-      constructor(x,y){ super(x,y,56,56,assets.enemy); this.dy = 1.8 + Math.random()*1.2; this.dx = (Math.random() * 2 - 1) * 0.8; }
-      update(){ this.x += this.dx; this.y += this.dy; if(this.y > H + 60) this.dead = true; if(this.x<0||this.x+this.w>W) this.dx *= -1; }
-    }
-    class Meteor extends Entity {
-      constructor(x,y){ super(x,y,64,64,assets.meteor); this.dy = 2.4 + Math.random()*1.4; this.dx = (Math.random()*2-1)*1.4; this.angle = 0; this.spin = (Math.random()*0.05)+0.01; }
-      update(){ this.x += this.dx; this.y += this.dy; this.angle += this.spin; if(this.y > H + 80) this.dead = true; }
-      draw(){
-        ctx.save();
-        ctx.translate(this.x + this.w/2, this.y + this.h/2);
-        ctx.rotate(this.angle);
-        ctx.drawImage(this.img, -this.w/2, -this.h/2, this.w, this.h);
-        ctx.restore();
-      }
-    }
+  }
+}
 
-    // Player
-    const player = {
-      x: W/2-28, y: H-110, w: 56, h: 56, speed: 4, img: null, cooldown: 0, lives: 3, inv: 0
-    };
-    let bullets = [];
-    let enemies = [];
-    let meteors = [];
-    let bgScroll = 0;
-    let score = 0;
-    let paused = false;
-    let running = false;
+function update(){
+  if(!running || paused) return;
+  time++;
 
-    function aabb(a,b){
-      return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
-    }
+  // background scroll
+  bgScroll += 1.4; if(bgScroll>=H) bgScroll=0;
 
-    function spawnEnemies(){
-      if (Math.random() < 0.03) {
-        const x = Math.random()*(W-60);
-        enemies.push(new Enemy(x, -70));
-      }
-    }
-    function spawnMeteors(){
-      if (Math.random() < 0.02) {
-        const x = Math.random()*(W-70);
-        meteors.push(new Meteor(x, -90));
-      }
-    }
+  // difficulty ramps over time
+  if(time%300===0) difficulty += 0.15;
 
-    function update(){
-      if (!running || paused) return;
+  // player input
+  const left = keys["arrowleft"]||keys["a"];
+  const right= keys["arrowright"]||keys["d"];
+  const up   = keys["arrowup"]||keys["w"];
+  const down = keys["arrowdown"]||keys["s"];
+  const shoot= keys[" "];
+  if(left)  player.x-=player.speed;
+  if(right) player.x+=player.speed;
+  if(up)    player.y-=player.speed;
+  if(down)  player.y+=player.speed;
+  player.x=Math.max(0,Math.min(W-player.w,player.x));
+  player.y=Math.max(0,Math.min(H-player.h,player.y));
 
-      // Background scroll
-      bgScroll += 1.2;
-      if (bgScroll >= H) bgScroll = 0;
+  // shooting
+  if(player.cooldown>0) player.cooldown--;
+  if(shoot && player.cooldown<=0){
+    bullets.push(new Bullet(player.x+player.w/2-8, player.y-24));
+    player.cooldown = 9;
+  }
 
-      // Player movement
-      const left = keys["arrowleft"] || keys["a"];
-      const right = keys["arrowright"] || keys["d"];
-      const up = keys["arrowup"] || keys["w"];
-      const down = keys["arrowdown"] || keys["s"];
-      const shoot = keys[" "];
+  // spawns
+  spawnEnemies();
+  spawnMeteors();
 
-      if (left)  player.x -= player.speed;
-      if (right) player.x += player.speed;
-      if (up)    player.y -= player.speed;
-      if (down)  player.y += player.speed;
-      player.x = Math.max(0, Math.min(W-player.w, player.x));
-      player.y = Math.max(0, Math.min(H-player.h, player.y));
+  // updates
+  bullets.forEach(b=>b.update());
+  enemies.forEach(e=>e.update());
+  meteors.forEach(m=>m.update());
+  particles.forEach(p=>p.update());
+  popups.forEach(p=>{ p.y += p.vy; p.life--; });
+  particles = particles.filter(p=>p.life>0);
+  popups = popups.filter(p=>p.life>0);
 
-      // Shooting
-      if (player.cooldown > 0) player.cooldown--;
-      if (shoot && player.cooldown <= 0) {
-        bullets.push(new Bullet(player.x + player.w/2 - 8, player.y - 24));
-        player.cooldown = 10;
-      }
-
-      // Spawners
-      spawnEnemies();
-      spawnMeteors();
-
-      // Update entities
-      bullets.forEach(b=>b.update());
-      enemies.forEach(e=>e.update());
-      meteors.forEach(m=>m.update());
-
-      // Collisions: bullets -> enemies/meteors
-      bullets.forEach(b=>{
-        enemies.forEach(e=>{
-          if(!b.dead && !e.dead && aabb(b.rect(), e.rect())) { b.dead = true; e.dead = true; score += 50; }
-        });
-        meteors.forEach(m=>{
-          if(!b.dead && !m.dead && aabb(b.rect(), m.rect())) { b.dead = true; m.dead = true; score += 25; }
-        });
-      });
-
-      // Collisions: player -> enemies/meteors
-      if (player.inv > 0) player.inv--;
-      enemies.forEach(e=>{
-        if(!e.dead && player.inv<=0 && aabb(player, e.rect())) { e.dead=true; damage(); }
-      });
-      meteors.forEach(m=>{
-        if(!m.dead && player.inv<=0 && aabb(player, m.rect())) { m.dead=true; damage(); }
-      });
-
-      // Cleanup
-      bullets = bullets.filter(b=>!b.dead);
-      enemies = enemies.filter(e=>!e.dead);
-      meteors = meteors.filter(m=>!m.dead);
-
-      // HUD
-      scoreEl.textContent = "Score: " + score;
-      livesEl.textContent = "Lives: " + player.lives;
-
-      // Draw
-      draw();
-
-      requestAnimationFrame(update);
-    }
-
-    function draw(){
-      // Tiled scrolling background
-      const bg = assets.background;
-      const tilesX = Math.ceil(W / bg.width) + 1;
-      const tilesY = Math.ceil(H / bg.height) + 1;
-      for (let y = -1; y < tilesY; y++){
-        for (let x = -1; x < tilesX; x++){
-          ctx.drawImage(bg, x * bg.width, (y * bg.height) + (bgScroll % bg.height));
-        }
-      }
-
-      // Entities
-      bullets.forEach(b=>b.draw());
-      enemies.forEach(e=>e.draw());
-      meteors.forEach(m=>m.draw());
-
-      // Player (blink when invulnerable)
-      if (player.inv % 6 < 4) {
-        ctx.drawImage(player.img, player.x, player.y, player.w, player.h);
-      }
-    }
-
-    function damage(){
-      player.lives--;
-      player.inv = 90; // ~1.5s of invulnerability
-      if (player.lives <= 0) gameOver();
-    }
-
-    function gameOver(){
-      running = false;
-      overlay.classList.add("active");
-      overlay.querySelector(".panel").innerHTML = `
-        <h1>Game Over</h1>
-        <p>Your score: <strong>${score}</strong></p>
-        <button id="restartBtn" class="btn">Play Again</button>
-        <p style="margin-top:10px"><small>Tip: You can adjust asset paths at the top of <code>index.html</code>.</small></p>
-      `;
-      overlay.querySelector("#restartBtn").addEventListener("click", startGame);
-    }
-
-    function startGame(){
-      // Reset state
-      bullets = [];
-      enemies = [];
-      meteors = [];
-      player.x = W/2-28; player.y = H-110; player.lives = 3; player.inv = 0; player.cooldown=0;
-      score = 0; paused = false; running = true;
-      overlay.classList.remove("active");
-      requestAnimationFrame(update);
-    }
-
-    // Pause toggle
-    addEventListener("keydown", (e)=>{
-      if (e.key.toLowerCase() === "p" && running) {
-        paused = !paused;
-        if (!paused) requestAnimationFrame(update);
+  // collisions: bullets -> enemies/meteors
+  bullets.forEach(b=>{
+    enemies.forEach(e=>{
+      if(!b.dead && !e.dead && aabb(b.rect(), e.rect())){
+        b.dead=true; e.hp--; if(e.hp<=0){ e.dead=true; explode(e.x+e.w/2, e.y+e.h/2); score+=50*mult; addPopup(e.x+e.w/2, e.y, "+50", "#8ef"); mult=Math.min(5, (mult+0.05)); multTimer=180; }
       }
     });
-
-    // Boot
-    (async function(){
-      try {
-        // Load assets
-        const [bg, playerImg, enemyImg, meteorImg, bulletImg] = await Promise.all([
-          loadImage(ASSET_PATHS.background),
-          loadImage(ASSET_PATHS.player),
-          loadImage(ASSET_PATHS.enemy),
-          loadImage(ASSET_PATHS.meteor),
-          loadImage(ASSET_PATHS.bullet),
-        ]);
-        assets.background = bg;
-        assets.enemy = enemyImg;
-        assets.meteor = meteorImg;
-        assets.bullet = bulletImg;
-        player.img = playerImg;
-
-        // Ready UI
-        startBtn.addEventListener("click", startGame);
-      } catch (err) {
-        console.error("Asset load error:", err);
-        overlay.classList.add("active");
-        overlay.querySelector(".panel").innerHTML = `
-          <h1>Asset Load Error</h1>
-          <p>Make sure these files exist (paths are from project root):</p>
-          <ul style="text-align:left">
-            <li>${ASSET_PATHS.background}</li>
-            <li>${ASSET_PATHS.player}</li>
-            <li>${ASSET_PATHS.enemy}</li>
-            <li>${ASSET_PATHS.meteor}</li>
-            <li>${ASSET_PATHS.bullet}</li>
-          </ul>
-          <button id="retryBtn" class="btn">Retry</button>
-        `;
-        document.getElementById("retryBtn").addEventListener("click", ()=>location.reload());
+    meteors.forEach(m=>{
+      if(!b.dead && !m.dead && aabb(b.rect(), m.rect())){
+        b.dead=true; m.hp--; if(m.hp<=0){ m.dead=true; explode(m.x+m.w/2, m.y+m.h/2, true); splitMeteor(m); score+=25*mult; addPopup(m.x+m.w/2, m.y, "+25","#fe9"); mult=Math.min(5,(mult+0.03)); multTimer=180; }
       }
-    })();
-  </script>
+    });
+  });
+
+  // combo decay
+  if(multTimer>0) multTimer--; else mult = Math.max(1, mult-0.01);
+
+  // collisions: player -> enemies/meteors
+  if(player.inv>0) player.inv--;
+  enemies.forEach(e=>{ if(!e.dead && player.inv<=0 && aabb(player,e.rect())){ e.dead=true; explode(e.x+e.w/2,e.y+e.h/2); damage(true);} });
+  meteors.forEach(m=>{ if(!m.dead && player.inv<=0 && aabb(player,m.rect())){ m.dead=true; explode(m.x+m.w/2,m.y+m.h/2,true); splitMeteor(m); damage(true);} });
+
+  // cleanup
+  bullets = bullets.filter(b=>!b.dead);
+  enemies = enemies.filter(e=>!e.dead);
+  meteors = meteors.filter(m=>!m.dead);
+
+  // HUD
+  scoreEl.textContent = "Score: " + Math.floor(score);
+  livesEl.textContent = "Lives: " + player.lives;
+  multEl.textContent  = "x" + Math.max(1,Math.floor(mult*10)/10).toFixed(1);
+
+  draw();
+  requestAnimationFrame(update);
+}
+
+function draw(){
+  // camera shake
+  let sx=0, sy=0;
+  if(shake>0){ sx = rand(-shake,shake); sy = rand(-shake,shake); shake*=0.9; if(shake<0.4) shake=0; }
+  ctx.save(); ctx.translate(sx, sy);
+
+  // tiled background
+  const bg=assets.background;
+  const tilesX=Math.ceil(W/bg.width)+1, tilesY=Math.ceil(H/bg.height)+1;
+  for(let y=-1;y<tilesY;y++) for(let x=-1;x<tilesX;x++){
+    ctx.drawImage(bg, x*bg.width, (y*bg.height)+(bgScroll%bg.height));
+  }
+
+  // entities
+  bullets.forEach(b=>b.draw());
+  enemies.forEach(e=>e.draw());
+  meteors.forEach(m=>m.draw());
+
+  // player (blink when invulnerable)
+  if(player.inv%6<4) ctx.drawImage(player.img, player.x, player.y, player.w, player.h);
+
+  // particles on top
+  particles.forEach(p=>p.draw());
+
+  // score popups
+  popups.forEach(p=>{
+    ctx.globalAlpha = Math.max(0,p.life/50);
+    ctx.fillStyle = p.color; ctx.font="bold 16px system-ui"; ctx.textAlign="center";
+    ctx.fillText(p.txt, p.x, p.y);
+    ctx.globalAlpha = 1;
+  });
+
+  ctx.restore();
+}
+
+function damage(big){
+  player.lives--; player.inv=90; if(big) shake=Math.max(shake,10);
+  if(player.lives<=0) gameOver();
+}
+
+function gameOver(){
+  running=false;
+  overlay.classList.add("active");
+  overlay.querySelector(".panel").innerHTML = `
+    <h1>Game Over</h1>
+    <p>Your score: <strong>${Math.floor(score)}</strong></p>
+    <button id="restartBtn" class="btn">Play Again</button>
+  `;
+  overlay.querySelector("#restartBtn").addEventListener("click", startGame);
+}
+
+function startGame(){
+  bullets=[]; enemies=[]; meteors=[]; particles=[]; popups=[];
+  player.x=W/2-28; player.y=H-110; player.lives=3; player.inv=0; player.cooldown=0;
+  score=0; mult=1; multTimer=0; paused=false; running=true; difficulty=1; time=0; shake=0;
+  overlay.classList.remove("active");
+  requestAnimationFrame(update);
+}
+
+addEventListener("keydown",(e)=>{ if(e.key.toLowerCase()==="p" && running){ paused=!paused; if(!paused) requestAnimationFrame(update);} });
+
+(async function(){
+  try{
+    const [bg, p, e, m, b] = await Promise.all([
+      loadImage(ASSET_PATHS.background),
+      loadImage(ASSET_PATHS.player),
+      loadImage(ASSET_PATHS.enemy),
+      loadImage(ASSET_PATHS.meteor),
+      loadImage(ASSET_PATHS.bullet),
+    ]);
+    assets.background=bg; assets.enemy=e; assets.meteor=m; assets.bullet=b; player.img=p;
+    startBtn.addEventListener("click", startGame);
+  }catch(err){
+    console.error("Asset load error:", err);
+    overlay.classList.add("active");
+    overlay.querySelector(".panel").innerHTML = `
+      <h1>Asset Load Error</h1>
+      <p>Make sure these files exist:</p>
+      <ul style="text-align:left">
+        <li>${ASSET_PATHS.background}</li><li>${ASSET_PATHS.player}</li>
+        <li>${ASSET_PATHS.enemy}</li><li>${ASSET_PATHS.meteor}</li><li>${ASSET_PATHS.bullet}</li>
+      </ul>
+      <button id="retryBtn" class="btn">Retry</button>
+    `;
+    document.getElementById("retryBtn").addEventListener("click",()=>location.reload());
+  }
+})();
+</script>
 </body>
 </html>
