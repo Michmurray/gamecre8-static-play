@@ -40,7 +40,7 @@
   <div class="overlay" id="start">
     <div class="card">
       <h1>GameCre8 — Galaxy Blaster</h1>
-      <p class="kpi">Controls: ←/→ or A/D, Space to fire. Tap to shoot on mobile.</p>
+      <p class="kpi">Controls: ←/→ or A/D, Space to fire. Tap on mobile.</p>
       <p class="kpi" id="bestLine"></p>
       <div style="height:10px"></div>
       <button class="btn" id="playBtn">Play Now</button>
@@ -71,50 +71,79 @@
     }; tryNext();
   });}
 
-  // Candidate asset locations (handles /assets/... and root-level Kenney folders you uploaded)
+  // Candidate asset locations (supports /assets, Spritesheet, and your Spritehseet typo)
   const CANDIDATES = {
     player: [
+      // /assets (Kenney typical)
       'assets/PNG/playerShip1_blue.png',
       'assets/PNG/Players/playerShip1_blue.png',
       'assets/PNG/playerShip2_orange.png',
       'assets/PNG/playerShip3_red.png',
+      // Correct "Spritesheet"
+      'assets/Spritesheet/playerShip1_blue.png',
+      'assets/Spritesheet/Players/playerShip1_blue.png',
       'Spritesheet/playerShip1_blue.png',
       'Spritesheet/Players/playerShip1_blue.png',
-      'Spritesheet/playerShip2_orange.png'
+      // Your typo "Spritehseet"
+      'assets/Spritehseet/playerShip1_blue.png',
+      'assets/Spritehseet/Players/playerShip1_blue.png',
+      'Spritehseet/playerShip1_blue.png',
+      'Spritehseet/Players/playerShip1_blue.png'
     ],
     enemy: [
       'assets/PNG/Enemies/enemyBlack1.png',
       'assets/PNG/Enemies/enemyBlue1.png',
       'assets/PNG/Enemies/enemyGreen1.png',
       'assets/PNG/Enemies/enemyRed1.png',
+      'assets/Spritesheet/Enemies/enemyBlack1.png',
+      'assets/Spritesheet/Enemies/enemyBlue1.png',
+      'assets/Spritesheet/Enemies/enemyGreen1.png',
+      'assets/Spritesheet/Enemies/enemyRed1.png',
+      'assets/Spritehseet/Enemies/enemyBlack1.png',
+      'assets/Spritehseet/Enemies/enemyBlue1.png',
+      'assets/Spritehseet/Enemies/enemyGreen1.png',
+      'assets/Spritehseet/Enemies/enemyRed1.png',
       'Spritesheet/Enemies/enemyBlack1.png',
-      'Spritesheet/Enemies/enemyBlue1.png',
-      'Spritesheet/Enemies/enemyGreen1.png',
-      'Spritesheet/Enemies/enemyRed1.png'
+      'Spritehseet/Enemies/enemyBlack1.png'
     ],
     meteor: [
       'assets/PNG/Meteors/meteorBrown_big1.png',
       'assets/PNG/Meteors/meteorGrey_big1.png',
       'assets/PNG/Meteors/meteorBrown_med1.png',
       'assets/PNG/Meteors/meteorGrey_med1.png',
+      'assets/Spritesheet/Meteors/meteorBrown_big1.png',
+      'assets/Spritesheet/Meteors/meteorGrey_big1.png',
+      'assets/Spritesheet/Meteors/meteorBrown_med1.png',
+      'assets/Spritesheet/Meteors/meteorGrey_med1.png',
+      'assets/Spritehseet/Meteors/meteorBrown_big1.png',
+      'assets/Spritehseet/Meteors/meteorGrey_big1.png',
+      'assets/Spritehseet/Meteors/meteorBrown_med1.png',
+      'assets/Spritehseet/Meteors/meteorGrey_med1.png',
       'Spritesheet/Meteors/meteorBrown_big1.png',
-      'Spritesheet/Meteors/meteorGrey_big1.png',
-      'Spritesheet/Meteors/meteorBrown_med1.png',
-      'Spritesheet/Meteors/meteorGrey_med1.png'
+      'Spritehseet/Meteors/meteorBrown_big1.png'
     ],
     bullet: [
       'assets/PNG/Lasers/laserBlue04.png',
       'assets/PNG/Lasers/laserBlue06.png',
       'assets/PNG/Lasers/laserBlue10.png',
+      'assets/Spritesheet/Lasers/laserBlue04.png',
+      'assets/Spritesheet/Lasers/laserBlue06.png',
+      'assets/Spritesheet/Lasers/laserBlue10.png',
+      'assets/Spritehseet/Lasers/laserBlue04.png',
+      'assets/Spritehseet/Lasers/laserBlue06.png',
+      'assets/Spritehseet/Lasers/laserBlue10.png',
       'Spritesheet/Lasers/laserBlue04.png',
-      'Spritesheet/Lasers/laserBlue06.png',
-      'Spritesheet/Lasers/laserBlue10.png'
+      'Spritehseet/Lasers/laserBlue04.png'
     ],
     ebullet: [
       'assets/PNG/Lasers/laserRed02.png',
       'assets/PNG/Lasers/laserRed06.png',
+      'assets/Spritesheet/Lasers/laserRed02.png',
+      'assets/Spritesheet/Lasers/laserRed06.png',
+      'assets/Spritehseet/Lasers/laserRed02.png',
+      'assets/Spritehseet/Lasers/laserRed06.png',
       'Spritesheet/Lasers/laserRed02.png',
-      'Spritesheet/Lasers/laserRed06.png'
+      'Spritehseet/Lasers/laserRed02.png'
     ],
     bg: [
       'assets/Backgrounds/black.png',
