@@ -1,16 +1,12 @@
-// Vercel Serverless Function: POST { prompt }
-// Reads ASSETS_BASE from env and returns a config object for the game.
+// /api/generate.js  — returns game config using your Supabase bucket (ASSETS_BASE)
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Use POST" });
   }
 
-  // Defensive body parsing (Vercel/Next usually parses JSON, but just in case)
   let body = req.body;
-  if (typeof body === "string") {
-    try { body = JSON.parse(body); } catch {}
-  }
+  if (typeof body === "string") { try { body = JSON.parse(body); } catch {} }
   const { prompt = "" } = body || {};
 
   const ASSETS_BASE = (process.env.ASSETS_BASE || "").replace(/\/+$/, "");
@@ -18,8 +14,8 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: "ASSETS_BASE env var is missing" });
   }
 
+  // simple palette switch from prompt word
   const p = String(prompt).toLowerCase();
-
   const palette = p.includes("green")
     ? { player: "Spritesheet/Players/playerShip2_green.png", laser: "Lasers/laserGreen06.png", enemy: "Enemies/enemyGreen3.png" }
     : p.includes("red")
