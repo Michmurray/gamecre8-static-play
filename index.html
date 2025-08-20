@@ -1,41 +1,64 @@
-// Vercel Serverless Function: POST { config, upgrade }
-// Applies quick upgrades and returns a new config.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Galaxy Blaster — GameCre8</title>
+  <style>
+    body { margin:0; background:#000; color:#fff; font-family:sans-serif; }
+    canvas { display:block; margin:auto; background:#000; }
+    #overlay { position:fixed; inset:0; display:grid; place-items:center; background:rgba(0,0,0,.6); }
+    #panel { background:#111; padding:20px; border-radius:12px; max-width:400px; text-align:center; }
+    button { padding:10px 16px; border:0; border-radius:8px; cursor:pointer; font-weight:bold; }
+    #tester { position:fixed; top:12px; right:12px; background:#101522; color:#fff; padding:10px; border-radius:10px; z-index:9999; }
+    #tester button{ margin:4px; background:#4b6bff; color:#fff; }
+    #tester pre { margin:0; max-width:320px; max-height:160px; overflow:auto; font-size:12px; background:#0b0f18; padding:6px; border-radius:8px; }
+  </style>
+</head>
+<body>
+  <canvas id="game" width="800" height="600"></canvas>
 
-export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Use POST" });
-  }
+  <div id="overlay">
+    <div id="panel">
+      <h1>Galaxy Blaster</h1>
+      <p>Press Start once assets are loaded.</p>
+      <button id="startBtn">Start</button>
+    </div>
+  </div>
 
-  let body = req.body;
-  if (typeof body === "string") {
-    try { body = JSON.parse(body); } catch {}
-  }
+  <!-- API TESTER PANEL -->
+  <div id="tester">
+    <div style="font-weight:700;margin-bottom:6px">API Tester</div>
+    <button id="tGen">Test /api/generate</button>
+    <button id="tMut">Mutate triple_shot</button>
+    <pre id="tOut"></pre>
+  </div>
 
-  const { config, upgrade } = body || {};
-  if (!config || !upgrade) {
-    return res.status(400).json({ error: "Missing config or upgrade" });
-  }
-
-  const out = JSON.parse(JSON.stringify(config)); // clone
-
-  switch (upgrade) {
-    case "triple_shot":
-      out.gameplay.tripleShot = true;
-      out.gameplay.bulletCooldown = Math.max(6, out.gameplay.bulletCooldown - 2);
-      break;
-    case "faster_enemies":
-      out.gameplay.enemySpeedMultiplier = (out.gameplay.enemySpeedMultiplier || 1) * 1.25;
-      out.gameplay.enemySpawnBase = out.gameplay.enemySpawnBase * 1.15;
-      break;
-    case "rapid_fire":
-      out.gameplay.bulletCooldown = Math.max(4, out.gameplay.bulletCooldown - 3);
-      break;
-    case "more_meteors":
-      out.gameplay.meteorMultiplier = (out.gameplay.meteorMultiplier || 1) * 1.4;
-      break;
-    default:
-      return res.status(400).json({ error: "Unknown upgrade" });
-  }
-
-  return res.status(200).json(out);
+<script>
+/* ---------------- API Tester ---------------- */
+async function _call(url, body){
+  try {
+    const r = await fetch(url, { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(body) });
+    const text = await r.text();
+    document.getElementById("tOut").textContent = `HTTP ${r.status}\n` + text;
+    try { const j = JSON.parse(text); if(j && j.sprites) window._cfg=j; } catch{}
+  } catch(e){ document.getElementById("tOut").textContent="Error: "+e.message; }
 }
+document.getElementById("tGen").onclick=()=>_call("/api/generate",{prompt:"blue galaxy blaster"});
+document.getElementById("tMut").onclick=()=>_call("/api/mutate",{config:window._cfg,upgrade:"triple_shot"});
+
+/* --------------- Minimal Game ---------------- */
+const canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
+const overlay=document.getElementById("overlay"), startBtn=document.getElementById("startBtn");
+let assets={}, player={x:380,y:500,w:40,h:40,img:null}, bullets=[];
+function loadImage(src){return new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=src;});}
+function draw(){ctx.clearRect(0,0,800,600);if(player.img)ctx.drawImage(player.img,player.x,player.y,player.w,player.h);bullets.forEach(b=>{ctx.fillStyle="red";ctx.fillRect(b.x,b.y,4,12);});}
+function update(){bullets.forEach(b=>b.y-=6);bullets=bullets.filter(b=>b.y>-20);draw();requestAnimationFrame(update);}
+startBtn.onclick=()=>{overlay.style.display="none";update();};
+document.addEventListener("keydown",e=>{if(e.key===" "){bullets.push({x:player.x+18,y:player.y});}});
+/* -------- Fetch config + load assets -------- */
+fetch("/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt:"blue galaxy blaster"})})
+.then(r=>r.json()).then(cfg=>loadImage(cfg.sprites.player)).then(img=>{player.img=img;draw();});
+</script>
+</body>
+</html>
