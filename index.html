@@ -1,64 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Galaxy Blaster — GameCre8</title>
-  <style>
-    body { margin:0; background:#000; color:#fff; font-family:sans-serif; }
-    canvas { display:block; margin:auto; background:#000; }
-    #overlay { position:fixed; inset:0; display:grid; place-items:center; background:rgba(0,0,0,.6); }
-    #panel { background:#111; padding:20px; border-radius:12px; max-width:400px; text-align:center; }
-    button { padding:10px 16px; border:0; border-radius:8px; cursor:pointer; font-weight:bold; }
-    #tester { position:fixed; top:12px; right:12px; background:#101522; color:#fff; padding:10px; border-radius:10px; z-index:9999; }
-    #tester button{ margin:4px; background:#4b6bff; color:#fff; }
-    #tester pre { margin:0; max-width:320px; max-height:160px; overflow:auto; font-size:12px; background:#0b0f18; padding:6px; border-radius:8px; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Galaxy Blaster — Safe Startup</title>
+<style>
+  body{margin:0;background:#000;color:#fff;font-family:system-ui,Segoe UI,Roboto,Arial}
+  #wrap{display:grid;place-items:center;height:100vh}
+  canvas{background:#000;border:1px solid #111;width:100%;max-width:960px;height:auto;aspect-ratio:16/9}
+  #overlay{position:fixed;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.6)}
+  .panel{background:#12131b;border:1px solid #1f2230;border-radius:12px;padding:18px 20px;max-width:520px;text-align:center}
+  .btn{padding:10px 16px;border:0;border-radius:10px;background:#4b6bff;color:#fff;font-weight:700;cursor:pointer}
+  .muted{color:#9aa0a6}
+  #tester{position:fixed;right:12px;top:12px;background:#101522;color:#fff;padding:10px;border-radius:10px;z-index:9999}
+  #tester .b{padding:6px 10px;border:0;border-radius:8px;background:#4b6bff;color:#fff;cursor:pointer;margin-right:6px}
+  #out{margin-top:6px;max-width:420px;max-height:200px;overflow:auto;font-size:12px;background:#0b0f18;padding:8px;border-radius:8px}
+  #paths{margin-top:10px;text-align:left;font-size:12px;word-break:break-all}
+  .ok{color:#7CFC7C}.bad{color:#ff8a80}
+</style>
 </head>
 <body>
-  <canvas id="game" width="800" height="600"></canvas>
+<div id="wrap"><canvas id="game" width="960" height="540"></canvas></div>
 
-  <div id="overlay">
-    <div id="panel">
-      <h1>Galaxy Blaster</h1>
-      <p>Press Start once assets are loaded.</p>
-      <button id="startBtn">Start</button>
+<div id="overlay">
+  <div class="panel">
+    <h2 style="margin:6px 0 10px">Galaxy Blaster</h2>
+    <div id="status" class="muted">Loading assets…</div>
+    <div id="paths"></div>
+    <div style="margin-top:12px">
+      <button id="startBtn" class="btn" disabled>Start</button>
     </div>
   </div>
+</div>
 
-  <!-- API TESTER PANEL -->
-  <div id="tester">
-    <div style="font-weight:700;margin-bottom:6px">API Tester</div>
-    <button id="tGen">Test /api/generate</button>
-    <button id="tMut">Mutate triple_shot</button>
-    <pre id="tOut"></pre>
-  </div>
+<!-- Simple API tester (optional) -->
+<div id="tester">
+  <div style="font-weight:700;margin-bottom:6px">API Tester</div>
+  <button class="b" id="tGen">Test /api/generate</button>
+  <button class="b" id="tMut">Mutate triple_shot</button>
+  <pre id="out"></pre>
+</div>
 
 <script>
-/* ---------------- API Tester ---------------- */
-async function _call(url, body){
-  try {
-    const r = await fetch(url, { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(body) });
-    const text = await r.text();
-    document.getElementById("tOut").textContent = `HTTP ${r.status}\n` + text;
-    try { const j = JSON.parse(text); if(j && j.sprites) window._cfg=j; } catch{}
-  } catch(e){ document.getElementById("tOut").textContent="Error: "+e.message; }
-}
-document.getElementById("tGen").onclick=()=>_call("/api/generate",{prompt:"blue galaxy blaster"});
-document.getElementById("tMut").onclick=()=>_call("/api/mutate",{config:window._cfg,upgrade:"triple_shot"});
+const c=document.getElementById("game"),ctx=c.getContext("2d");
+const overlay=document.getElementById("overlay"), statusEl=document.getElementById("status"), pathsEl=document.getElementById("paths");
+const startBtn=document.getElementById("startBtn");
 
-/* --------------- Minimal Game ---------------- */
-const canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
-const overlay=document.getElementById("overlay"), startBtn=document.getElementById("startBtn");
-let assets={}, player={x:380,y:500,w:40,h:40,img:null}, bullets=[];
-function loadImage(src){return new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=src;});}
-function draw(){ctx.clearRect(0,0,800,600);if(player.img)ctx.drawImage(player.img,player.x,player.y,player.w,player.h);bullets.forEach(b=>{ctx.fillStyle="red";ctx.fillRect(b.x,b.y,4,12);});}
-function update(){bullets.forEach(b=>b.y-=6);bullets=bullets.filter(b=>b.y>-20);draw();requestAnimationFrame(update);}
-startBtn.onclick=()=>{overlay.style.display="none";update();};
-document.addEventListener("keydown",e=>{if(e.key===" "){bullets.push({x:player.x+18,y:player.y});}});
-/* -------- Fetch config + load assets -------- */
-fetch("/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt:"blue galaxy blaster"})})
-.then(r=>r.json()).then(cfg=>loadImage(cfg.sprites.player)).then(img=>{player.img=img;draw();});
+let CFG=null, IMGS={}, running=false;
+let player={x: c.width/2-24, y: c.height-110, w:48, h:48, speed:4.2, cooldown:0, lives:3};
+
+// -------- helpers
+function loadImage(src){
+  return new Promise((resolve,reject)=>{
+    const i=new Image(); i.crossOrigin="anonymous";
+    i.onload=()=>resolve(i);
+    i.onerror=()=>reject(new Error("Image failed: "+src));
+    i.src=src;
+  });
+}
+function showPaths(cfg, okMap){
+  const p=cfg.sprites;
+  const li = (label,url)=> {
+    const ok = okMap[label]; 
+    return `<div><b>${label}</b>: <a href="${url}" target="_blank">${url}</a> <span class="${ok?'ok':'bad'}">[${ok?'OK':'MISSING'}]</span></div>`;
+  };
+  pathsEl.innerHTML = `
+    <div style="margin-top:8px">
+      ${li('background',p.background)}
+      ${li('player',p.player)}
+      ${li('enemy',p.enemy)}
+      ${li('meteor',p.meteor)}
+      ${li('bullet',p.bullet)}
+    </div>
+  `;
+}
+
+// -------- tiny game loop (draws fallback ship if image missing)
+let bullets=[];
+function drawShip(x,y){
+  if (IMGS.player){
+    ctx.drawImage(IMGS.player,x,y,player.w,player.h);
+  }else{
+    // fallback white triangle so you can play even if the image URL is wrong
+    ctx.fillStyle="#fff";
+    ctx.beginPath();
+    ctx.moveTo(x+player.w/2,y);
+    ctx.lineTo(x,y+player.h);
+    ctx.lineTo(x+player.w,y+player.h);
+    ctx.closePath();
+    ctx.fill();
+  }
+}
+function update(){
+  if(!running) return;
+  ctx.clearRect(0,0,c.width,c.height);
+  if (IMGS.background){
+    const bw = IMGS.background.width, bh = IMGS.background.height;
+    for(let y=0;y<c.height;y+=bh) for(let x=0;x<c.width;x+=bw) ctx.drawImage(IMGS.background,x,y);
+  }
+  // player
+  drawShip(player.x, player.y);
+  // bullets
+  bullets.forEach(b=>{ b.y-=8; ctx.fillStyle="#ff4d4d"; ctx.fillRect(b.x,b.y,4,12); });
+  bullets = bullets.filter(b=>b.y>-20);
+  requestAnimationFrame(update);
+}
+document.addEventListener("keydown",e=>{
+  const k=e.key.toLowerCase();
+  if(k==="arrowleft"||k==="a") player.x-=player.speed;
+  if(k==="arrowright"||k==="d") player.x+=player.speed;
+  if(k==="arrowup"||k==="w") player.y-=player.speed;
+  if(k==="arrowdown"||k==="s") player.y+=player.speed;
+  if(e.key===" ") bullets.push({x:player.x+player.w/2-2,y:player.y});
+});
+
+// -------- boot: get config, load images (with per-url pass/fail)
+(async function init(){
+  try{
+    const r = await fetch("/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt:"blue galaxy blaster"})});
+    CFG = await r.json();
+    const S = CFG.sprites;
+    // Try each image independently so we can mark which one failed
+    const ok = {background:false,player:false,enemy:false,meteor:false,bullet:false};
+    const tryLoad = async (key,url)=>{ try { IMGS[key] = await loadImage(url); ok[key]=true; } catch(e) { ok[key]=false; console.warn(e.message); } };
+    await Promise.all([
+      tryLoad("background", S.background),
+      tryLoad("player",     S.player),
+      tryLoad("enemy",      S.enemy),
+      tryLoad("meteor",     S.meteor),
+      tryLoad("bullet",     S.bullet),
+    ]);
+    showPaths(CFG, ok);
+    statusEl.textContent = "Assets checked. If any say MISSING, click the link to see what's wrong.";
+    startBtn.disabled = false;
+  }catch(err){
+    statusEl.textContent = "Init Error: "+err.message;
+  }
+})();
+
+startBtn.onclick = ()=>{ overlay.style.display="none"; running=true; update(); };
+
+// ----- minimal tester (optional)
+async function _call(url, body){
+  const r = await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+  const text = await r.text();
+  document.getElementById("out").textContent = `HTTP ${r.status}\n` + text;
+  try{ const j=JSON.parse(text); if(j && j.sprites) window._cfg=j; }catch{}
+}
+document.getElementById("tGen").onclick=()=>_call("/api/generate",{prompt:"blue"});
+document.getElementById("tMut").onclick=()=>_call("/api/mutate",{config:window._cfg,upgrade:"triple_shot"});
 </script>
 </body>
 </html>
