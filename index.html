@@ -305,11 +305,11 @@ function damage(big){ player.lives--; player.inv=90; if(big) shake=Math.max(shak
 function gameOver(){
   running=false;
   overlay.classList.add("active");
-  overlay.querySelector(".panel").innerHTML = `
+  overlay.querySelector(".panel").innerHTML = \`
     <h1>Game Over</h1>
-    <p>Your score: <strong>${Math.floor(score)}</strong></p>
+    <p>Your score: <strong>\${Math.floor(score)}</strong></p>
     <button id="restartBtn" class="btn">Play Again</button>
-  `;
+  \`;
   overlay.querySelector("#restartBtn").addEventListener("click", startGame);
 }
 function startGame(){
@@ -345,12 +345,12 @@ function bootWithConfig(cfg){
 
   // 3) Load images, then show Start overlay
   overlay.classList.add("active");
-  overlay.querySelector(".panel").innerHTML = `
+  overlay.querySelector(".panel").innerHTML = \`
     <h1>Galaxy Blaster</h1>
-    <p>Prompt: <em>${(cfg.meta?.prompt||"")}</em></p>
+    <p>Prompt: <em>\${(cfg.meta?.prompt||"")}</em></p>
     <p>Assets served from Supabase. Click Start to play.</p>
     <button id="startBtn" class="btn">Start</button>
-  `;
+  \`;
   Promise.all([
     loadImage(ASSET_PATHS.background),
     loadImage(ASSET_PATHS.player),
@@ -364,18 +364,18 @@ function bootWithConfig(cfg){
   }).catch(err=>{
     console.error("Asset load error", err);
     overlay.classList.add("active");
-    overlay.querySelector(".panel").innerHTML = `
+    overlay.querySelector(".panel").innerHTML = \`
       <h1>Asset Load Error</h1>
       <p>Check your Supabase file paths:</p>
       <ul style="text-align:left">
-        <li>${ASSET_PATHS.background}</li>
-        <li>${ASSET_PATHS.player}</li>
-        <li>${ASSET_PATHS.enemy}</li>
-        <li>${ASSET_PATHS.meteor}</li>
-        <li>${ASSET_PATHS.bullet}</li>
+        <li>\${ASSET_PATHS.background}</li>
+        <li>\${ASSET_PATHS.player}</li>
+        <li>\${ASSET_PATHS.enemy}</li>
+        <li>\${ASSET_PATHS.meteor}</li>
+        <li>\${ASSET_PATHS.bullet}</li>
       </ul>
       <button id="retryBtn" class="btn">Retry</button>
-    `;
+    \`;
     document.getElementById("retryBtn")?.addEventListener("click", ()=>location.reload());
   });
 }
@@ -425,11 +425,11 @@ addEventListener("load", ()=>{
   fetchConfig().catch(err=>{
     console.error(err);
     overlay.classList.add("active");
-    overlay.querySelector(".panel").innerHTML = `
+    overlay.querySelector(".panel").innerHTML = \`
       <h1>Init Error</h1>
       <p>Couldn’t fetch /api/generate. Check your Vercel logs and ASSETS_BASE env.</p>
       <button id="retryBtn" class="btn">Retry</button>
-    `;
+    \`;
     document.getElementById("retryBtn")?.addEventListener("click", ()=>location.reload());
   });
 });
