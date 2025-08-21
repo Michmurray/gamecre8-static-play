@@ -1,4 +1,5 @@
-// /api/generate.js — minimal, known-good paths
+// /api/generate.js — uses your repo's exact file paths (works with ASSETS_BASE set to raw GitHub OR Supabase)
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Use POST" });
@@ -9,12 +10,17 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: "ASSETS_BASE env var is missing" });
   }
 
-  // Use the exact Kenney file names/paths you uploaded
+  // IMPORTANT: these paths match your repo:
+  // - Backgrounds/black.png            ✅
+  // - Spritesheet/playerShip1_blue.png ✅ (no "Players/" folder)
+  // - Enemies/enemyBlue3.png           ✅
+  // - Meteors/meteorBrown_big1.png     ✅
+  // - Lasers/laserBlue06.png           ✅
   const config = {
-    meta: { template: "galaxy_blaster", seed: Date.now(), prompt: "" },
+    meta: { template: "galaxy_blaster", seed: Date.now() },
     sprites: {
       background: `${ASSETS_BASE}/Backgrounds/black.png`,
-      player:     `${ASSETS_BASE}/Spritesheet/Players/playerShip1_blue.png`,
+      player:     `${ASSETS_BASE}/Spritesheet/playerShip1_blue.png`,
       enemy:      `${ASSETS_BASE}/Enemies/enemyBlue3.png`,
       meteor:     `${ASSETS_BASE}/Meteors/meteorBrown_big1.png`,
       bullet:     `${ASSETS_BASE}/Lasers/laserBlue06.png`
